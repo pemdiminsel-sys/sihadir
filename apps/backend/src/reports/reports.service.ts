@@ -37,7 +37,7 @@ export class ReportsService {
   }
 
   async generateCertificatePdf(attendanceId: string): Promise<Buffer> {
-    const attendance = await this.prisma.attendance.findUnique({
+    let attendance = await this.prisma.attendance.findUnique({
       where: { id: attendanceId },
       include: {
         participant: true,
@@ -45,8 +45,33 @@ export class ReportsService {
       },
     });
 
+    // Fallback: If attendance is not found, check if the ID is actually an Event ID (for Preview)
+    if (!attendance) {
+      const event = await this.prisma.event.findUnique({ where: { id: attendanceId } });
+      if (event) {
+        // Create a mock attendance for the preview
+        attendance = {
+          id: 'preview-id',
+          eventId: event.id,
+          participantId: 'preview-user',
+          checkIn: new Date(),
+          latitude: null,
+          longitude: null,
+          selfieUrl: null,
+          status: 'HADIR',
+          deviceInfo: null,
+          isLate: false,
+          minutesLate: 0,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          participant: { name: 'Admin (Preview Mode)' } as any,
+          event: event as any,
+        };
+      }
+    }
+
     if (!attendance || !attendance.participant || !attendance.event) {
-      throw new NotFoundException('Data kehadiran tidak lengkap atau tidak ditemukan');
+      throw new NotFoundException('Data kehadiran atau kegiatan tidak ditemukan');
     }
 
     return new Promise(async (resolve, reject) => {
