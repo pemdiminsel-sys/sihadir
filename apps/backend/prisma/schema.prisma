@@ -90,6 +90,7 @@ model Event {
   requireGps     Boolean  @default(true)
   status         String   @default("DRAFT")
   category       String?
+  hasCertificate Boolean  @default(false)
 
   // Registration Policy
   requiresRegistration Boolean   @default(false)

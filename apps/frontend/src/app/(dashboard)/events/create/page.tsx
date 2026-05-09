@@ -63,6 +63,7 @@ export default function CreateEventPage() {
     // Step 2
     requiresRegistration: false, requiresApproval: false, isPublic: true,
     maxParticipants: '', hasWaitingList: false, invitationOnly: false, multiSession: false,
+    hasCertificate: false,
     // Step 3
     requireGps: true, radiusMeter: 100, lateTolerance: 15,
     timeBoundAttendance: false,
@@ -282,6 +283,7 @@ export default function CreateEventPage() {
                 <FieldRow label="Sistem Waiting List" desc="Peserta masuk waiting list saat kuota penuh" enabled={form.hasWaitingList} onToggle={() => tog('hasWaitingList')} />
                 <FieldRow label="Hanya Undangan" desc="Hanya peserta dengan token undangan yang bisa daftar" enabled={form.invitationOnly} onToggle={() => tog('invitationOnly')} />
                 <FieldRow label="Multi Sesi" desc="Kegiatan dibagi menjadi beberapa sesi" enabled={form.multiSession} onToggle={() => tog('multiSession')} />
+                <FieldRow label="Menyediakan Sertifikat" desc="Sertifikat digital otomatis tersedia setelah kegiatan" enabled={form.hasCertificate} onToggle={() => tog('hasCertificate')} />
               </div>
               <div>
                 <label className={labelCls}><Users className="w-3.5 h-3.5 inline mr-1" />Kuota Maksimal Peserta</label>

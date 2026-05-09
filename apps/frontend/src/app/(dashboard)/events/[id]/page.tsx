@@ -10,7 +10,8 @@ import api from '@/services/api';
 import {
   Calendar, MapPin, Users, QrCode, Activity, Settings, ChevronLeft,
   Check, Clock, Shield, UserCheck, UserX, MoreHorizontal, RefreshCw,
-  Download, AlertTriangle, CheckCircle2, Hourglass, List, LayoutGrid, Send
+  Download, AlertTriangle, CheckCircle2, Hourglass, List, LayoutGrid, Send,
+  Pencil, Trash2, X, Info, Settings2, QrCode as QrIcon, Bell, MapPin as PinIcon
 } from 'lucide-react';
 
 const TABS = [
@@ -150,6 +151,25 @@ export default function EventDetailPage() {
     },
   });
 
+  const updateMut = useMutation({
+    mutationFn: (data: any) => api.patch(`/events/${id}`, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['event', id] });
+      setShowEditModal(false);
+    },
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: () => api.delete(`/events/${id}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['events'] });
+      router.push('/events');
+    },
+  });
+
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   if (isLoading) return <div className="space-y-4">{[1,2,3].map(i => <div key={i} className="h-24 bg-slate-100 rounded-2xl animate-pulse" />)}</div>;
   if (!event) return <div className="text-center py-16 text-slate-400">Kegiatan tidak ditemukan</div>;
 
@@ -189,6 +209,20 @@ export default function EventDetailPage() {
               )}
               <button className="px-4 py-2 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2">
                 <Download className="w-4 h-4" /> Laporan
+              </button>
+              <button 
+                onClick={() => setShowEditModal(true)}
+                className="p-2 rounded-xl border border-slate-200 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                title="Edit Kegiatan"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setShowDeleteConfirm(true)}
+                className="p-2 rounded-xl border border-slate-200 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                title="Hapus Kegiatan"
+              >
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -374,6 +408,139 @@ export default function EventDetailPage() {
           )}
         </motion.div>
       </AnimatePresence>
+
+      {/* Edit Modal */}
+      <AnimatePresence>
+        {showEditModal && (
+          <EditEventModal 
+            event={event} 
+            onClose={() => setShowEditModal(false)} 
+            onSave={(data) => updateMut.mutate(data)}
+            isSaving={updateMut.isPending}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[100] p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-[#0a0f1d] border border-white/10 rounded-[2.5rem] shadow-2xl w-full max-w-sm p-8 text-center"
+            >
+              <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="h-8 w-8 text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Hapus Kegiatan?</h3>
+              <p className="text-slate-400 text-sm mb-6">Tindakan ini tidak dapat dibatalkan. Seluruh data registrasi dan kehadiran akan ikut terhapus.</p>
+              <div className="flex gap-3">
+                <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 h-12 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-bold transition-all">Batal</button>
+                <button onClick={() => deleteMut.mutate()} disabled={deleteMut.isPending}
+                  className="flex-1 h-12 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold transition-all shadow-lg shadow-red-600/30 disabled:opacity-50"
+                >
+                  {deleteMut.isPending ? 'Menghapus...' : 'Ya, Hapus'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function EditEventModal({ event, onClose, onSave, isSaving }: any) {
+  const [form, setForm] = useState({
+    title: event.title,
+    description: event.description || '',
+    venue: event.venue,
+    startTime: format(new Date(event.startTime), "yyyy-MM-dd'T'HH:mm"),
+    endTime: format(new Date(event.endTime), "yyyy-MM-dd'T'HH:mm"),
+    hasCertificate: event.hasCertificate,
+    requiresRegistration: event.requiresRegistration,
+    requiresApproval: event.requiresApproval,
+    isPublic: event.isPublic,
+  });
+
+  const inputCls = "w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all";
+  const labelCls = "block text-xs font-black text-slate-400 uppercase tracking-widest mb-2";
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[100] p-4">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+        className="bg-[#0a0f1d] border border-white/10 rounded-[2.5rem] shadow-2xl w-full max-w-2xl overflow-hidden"
+      >
+        <div className="bg-slate-900 p-6 flex items-center justify-between border-b border-white/5">
+          <div>
+            <h2 className="text-white font-black text-xl">Edit Detail Kegiatan</h2>
+            <p className="text-slate-400 text-sm mt-0.5">Perbarui informasi dasar dan kebijakan kegiatan</p>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-colors">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <form onSubmit={(e) => { e.preventDefault(); onSave(form); }} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+          <div className="space-y-4">
+            <div>
+              <label className={labelCls}>Judul Kegiatan</label>
+              <input className={inputCls} value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
+            </div>
+            <div>
+              <label className={labelCls}>Deskripsi</label>
+              <textarea className={`${inputCls} h-24 py-3 resize-none`} value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
+            </div>
+            <div>
+              <label className={labelCls}>Lokasi / Venue</label>
+              <input className={inputCls} value={form.venue} onChange={e => setForm({...form, venue: e.target.value})} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>Waktu Mulai</label>
+                <input type="datetime-local" className={inputCls} value={form.startTime} onChange={e => setForm({...form, startTime: e.target.value})} />
+              </div>
+              <div>
+                <label className={labelCls}>Waktu Selesai</label>
+                <input type="datetime-local" className={inputCls} value={form.endTime} onChange={e => setForm({...form, endTime: e.target.value})} />
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-white/5 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+              <div>
+                <p className="text-xs font-bold text-white">Sertifikat Digital</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Sediakan sertifikat otomatis</p>
+              </div>
+              <button type="button" onClick={() => setForm({...form, hasCertificate: !form.hasCertificate})}
+                className={`w-10 h-5 rounded-full relative transition-colors ${form.hasCertificate ? 'bg-blue-600' : 'bg-slate-700'}`}>
+                <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${form.hasCertificate ? 'left-6' : 'left-1'}`} />
+              </button>
+            </div>
+            <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+              <div>
+                <p className="text-xs font-bold text-white">Wajib Registrasi</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Peserta harus daftar dulu</p>
+              </div>
+              <button type="button" onClick={() => setForm({...form, requiresRegistration: !form.requiresRegistration})}
+                className={`w-10 h-5 rounded-full relative transition-colors ${form.requiresRegistration ? 'bg-blue-600' : 'bg-slate-700'}`}>
+                <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${form.requiresRegistration ? 'left-6' : 'left-1'}`} />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex gap-4 pt-4">
+            <button type="button" onClick={onClose} className="flex-1 h-12 rounded-2xl text-slate-400 hover:text-white hover:bg-white/5 border border-white/5 font-bold transition-all">
+              Batal
+            </button>
+            <button type="submit" disabled={isSaving}
+              className="flex-1 h-12 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest shadow-lg shadow-blue-600/30 disabled:opacity-50"
+            >
+              {isSaving ? 'Menyimpan...' : 'Simpan Perubahan'}
+            </button>
+          </div>
+        </form>
+      </motion.div>
     </div>
   );
 }
