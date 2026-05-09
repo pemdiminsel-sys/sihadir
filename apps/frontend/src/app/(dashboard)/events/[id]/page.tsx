@@ -10,7 +10,7 @@ import api from '@/services/api';
 import {
   Calendar, MapPin, Users, QrCode, Activity, Settings, ChevronLeft,
   Check, Clock, Shield, UserCheck, UserX, MoreHorizontal, RefreshCw,
-  Download, AlertTriangle, CheckCircle2, Hourglass, List, LayoutGrid
+  Download, AlertTriangle, CheckCircle2, Hourglass, List, LayoutGrid, Send
 } from 'lucide-react';
 
 const TABS = [
@@ -142,6 +142,14 @@ export default function EventDetailPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['event-regs', id] }),
   });
 
+  const publishMut = useMutation({
+    mutationFn: (status: 'PUBLISHED' | 'ARCHIVED') => api.patch(`/events/${id}`, { status }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['event', id] });
+      qc.invalidateQueries({ queryKey: ['events'] });
+    },
+  });
+
   if (isLoading) return <div className="space-y-4">{[1,2,3].map(i => <div key={i} className="h-24 bg-slate-100 rounded-2xl animate-pulse" />)}</div>;
   if (!event) return <div className="text-center py-16 text-slate-400">Kegiatan tidak ditemukan</div>;
 
@@ -169,6 +177,16 @@ export default function EventDetailPage() {
               <p className="text-sm text-slate-500 mt-1">{event.description}</p>
             </div>
             <div className="flex gap-2 shrink-0">
+              {event.status === 'DRAFT' && (
+                <button 
+                  onClick={() => publishMut.mutate('PUBLISHED')}
+                  disabled={publishMut.isPending}
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-black transition-all flex items-center gap-2 shadow-lg shadow-blue-600/30 disabled:opacity-50"
+                >
+                  <Send className="w-4 h-4" /> 
+                  {publishMut.isPending ? 'Memproses...' : 'Aktifkan Kegiatan'}
+                </button>
+              )}
               <button className="px-4 py-2 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2">
                 <Download className="w-4 h-4" /> Laporan
               </button>
