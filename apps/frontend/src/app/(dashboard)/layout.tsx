@@ -4,7 +4,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import Topbar from '@/components/layout/Topbar';
 import QuickActionDock from '@/components/layout/QuickActionDock';
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 
@@ -17,13 +17,20 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const { token, user } = useAuthStore();
 
+  const [isHydrated, setIsHydrated] = useState(false);
+
   useEffect(() => {
-    if (!token || !user) {
+    setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (isHydrated && (!token || !user)) {
       router.push('/login');
     }
-  }, [token, user, router]);
+  }, [isHydrated, token, user, router]);
 
-  if (!token || !user) {
+  // Render nothing or a loader while checking auth
+  if (!isHydrated || !token || !user) {
     return null;
   }
 
