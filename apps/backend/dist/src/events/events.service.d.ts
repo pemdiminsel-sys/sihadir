@@ -4,9 +4,6 @@ export declare class EventsService {
     constructor(prisma: PrismaService);
     create(data: any): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
         title: string;
         description: string | null;
         venue: string;
@@ -39,14 +36,17 @@ export declare class EventsService {
         bannerUrl: string | null;
         agenda: import("@prisma/client/runtime/library").JsonValue | null;
         speakers: import("@prisma/client/runtime/library").JsonValue | null;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
         organizerId: string;
     }>;
     findAll(): Promise<({
         opd: {
             id: string;
-            name: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             code: string | null;
         };
         _count: {
@@ -54,9 +54,6 @@ export declare class EventsService {
         };
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
         title: string;
         description: string | null;
         venue: string;
@@ -89,32 +86,35 @@ export declare class EventsService {
         bannerUrl: string | null;
         agenda: import("@prisma/client/runtime/library").JsonValue | null;
         speakers: import("@prisma/client/runtime/library").JsonValue | null;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
         organizerId: string;
     })[]>;
     findOne(id: string): Promise<{
         opd: {
             id: string;
-            name: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             code: string | null;
         };
         sessions: {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
             title: string;
             startTime: Date;
             endTime: Date;
+            createdAt: Date;
+            updatedAt: Date;
             eventId: string;
             speakerName: string | null;
         }[];
         attendances: ({
             participant: {
                 id: string;
-                name: string;
                 createdAt: Date;
                 updatedAt: Date;
+                name: string;
                 email: string | null;
                 phone: string | null;
                 institution: string | null;
@@ -128,24 +128,21 @@ export declare class EventsService {
             };
         } & {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
             latitude: number | null;
             longitude: number | null;
             status: string;
+            createdAt: Date;
+            updatedAt: Date;
             eventId: string;
             participantId: string;
+            checkIn: Date;
             selfieUrl: string | null;
             deviceInfo: string | null;
-            checkIn: Date;
             isLate: boolean;
             minutesLate: number | null;
         })[];
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
         title: string;
         description: string | null;
         venue: string;
@@ -178,13 +175,13 @@ export declare class EventsService {
         bannerUrl: string | null;
         agenda: import("@prisma/client/runtime/library").JsonValue | null;
         speakers: import("@prisma/client/runtime/library").JsonValue | null;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
         organizerId: string;
     }>;
     update(id: string, data: any): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
         title: string;
         description: string | null;
         venue: string;
@@ -217,13 +214,13 @@ export declare class EventsService {
         bannerUrl: string | null;
         agenda: import("@prisma/client/runtime/library").JsonValue | null;
         speakers: import("@prisma/client/runtime/library").JsonValue | null;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
         organizerId: string;
     }>;
     remove(id: string): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
         title: string;
         description: string | null;
         venue: string;
@@ -256,6 +253,9 @@ export declare class EventsService {
         bannerUrl: string | null;
         agenda: import("@prisma/client/runtime/library").JsonValue | null;
         speakers: import("@prisma/client/runtime/library").JsonValue | null;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
         organizerId: string;
     }>;
     generateDynamicQR(eventId: string): Promise<{
