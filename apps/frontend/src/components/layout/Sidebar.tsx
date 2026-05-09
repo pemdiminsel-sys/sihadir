@@ -216,12 +216,6 @@ export default function Sidebar() {
           </div>
         </div>
       </div>
-      
-      <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 0px;
-        }
-      `}</style>
     </div>
   );
 }
