@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Server, Shield, Users, Zap, HardDrive, Flag, Award, Terminal,
   Activity, Clock, ChevronRight, Globe, AlertTriangle, CheckCircle2,
-  Layers, Database, Brain
+  Layers, Database, Brain, Building2
 } from 'lucide-react';
 
 import InfrastructureModule from './modules/InfrastructureModule';
