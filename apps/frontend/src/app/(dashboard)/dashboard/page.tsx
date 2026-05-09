@@ -210,7 +210,7 @@ export default function DashboardPage() {
                       <Clock className="w-8 h-8 text-slate-200 mb-2" />
                       <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Belum ada aktivitas hari ini</p>
                     </div>
-                  ) : [].map((item, idx) => (
+                  ) : ([] as any[]).map((item, idx) => (
                     <div key={idx} className="flex gap-4 items-start group">
                       <div className="relative">
                         <div className={`w-2 h-2 mt-1.5 rounded-full ${item.valid ? 'bg-emerald-500' : 'bg-amber-500'} ring-4 ring-slate-50`}></div>
