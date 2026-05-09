@@ -1,0 +1,345 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String
+  name          String
+  roleId        String
+  opdId         String?
+  role          Role           @relation(fields: [roleId], references: [id])
+  opd           OPD?           @relation(fields: [opdId], references: [id])
+  loginLogs     LoginLog[]
+  auditLogs     AuditLog[]
+  notifications Notification[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
+
+  @@map("users")
+}
+
+model Role {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  permissions RolePermission[]
+  users       User[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@map("roles")
+}
+
+model Permission {
+  id        String           @id @default(uuid())
+  name      String           @unique
+  roles     RolePermission[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model OPD {
+  id           String        @id @default(uuid())
+  name         String        @unique
+  code         String?       @unique
+  users        User[]
+  events       Event[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  TenantConfig TenantConfig?
+
+  @@map("opd")
+}
+
+model Event {
+  id             String @id @default(uuid())
+  title          String
+  description    String?
+  organizerId    String
+  opd            OPD    @relation(fields: [organizerId], references: [id])
+  venue          String
+  latitude       Float?
+  longitude      Float?
+  radiusMeter    Int    @default(100)
+  startTime      DateTime
+  endTime        DateTime
+  attendanceMode String   @default("QR")
+  qrType         String   @default("DYNAMIC")
+  requireSelfie  Boolean  @default(false)
+  requireGps     Boolean  @default(true)
+  status         String   @default("DRAFT")
+  category       String?
+
+  // Registration Policy
+  requiresRegistration Boolean   @default(false)
+  requiresApproval     Boolean   @default(false)
+  isPublic             Boolean   @default(true)
+  maxParticipants      Int?
+  hasWaitingList       Boolean   @default(false)
+  invitationOnly       Boolean   @default(false)
+  multiSession         Boolean   @default(false)
+  dynamicQr            Boolean   @default(true)
+  timeBoundAttendance  Boolean   @default(false)
+
+  // Timing
+  registrationOpenAt  DateTime?
+  registrationCloseAt DateTime?
+  attendanceOpenAt    DateTime?
+  attendanceCloseAt   DateTime?
+  lateTolerance       Int  @default(15)
+  qrRefreshInterval   Int  @default(60)
+
+  // Content
+  bannerUrl String?
+  agenda    Json?
+  speakers  Json?
+
+  sessions      EventSession[]
+  attendances   Attendance[]
+  qrCodes       QRCode[]
+  certificates  Certificate[]
+  registrations EventRegistration[]
+  AnomalyLog    AnomalyLog[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  @@map("events")
+}
+
+model EventSession {
+  id          String   @id @default(uuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id])
+  title       String
+  startTime   DateTime
+  endTime     DateTime
+  speakerName String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("event_sessions")
+}
+
+model Participant {
+  id              String  @id @default(uuid())
+  name            String
+  email           String? @unique
+  phone           String?
+  institution     String?
+  position        String?
+  qrCode          String? @unique
+  participantType String? @default("ASN")
+  asnType         String?
+  identityNumber  String?
+  ktpNumber       String?
+  gender          String?
+
+  attendances   Attendance[]
+  certificates  Certificate[]
+  registrations EventRegistration[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("participants")
+}
+
+model EventRegistration {
+  id            String      @id @default(uuid())
+  eventId       String
+  participantId String
+  event         Event       @relation(fields: [eventId], references: [id])
+  participant   Participant @relation(fields: [participantId], references: [id])
+  status        String      @default("MENUNGGU")
+  notes         String?
+  rejectionNote String?
+  approvedBy    String?
+  approvedAt    DateTime?
+  inviteToken   String?     @unique
+  registeredAt  DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([eventId, participantId])
+  @@map("event_registrations")
+}
+
+model Attendance {
+  id            String      @id @default(uuid())
+  eventId       String
+  participantId String
+  event         Event       @relation(fields: [eventId], references: [id])
+  participant   Participant @relation(fields: [participantId], references: [id])
+  checkIn       DateTime    @default(now())
+  latitude      Float?
+  longitude     Float?
+  selfieUrl     String?
+  status        String      @default("HADIR")
+  deviceInfo    String?
+  isLate        Boolean     @default(false)
+  minutesLate   Int?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("attendance")
+}
+
+model QRCode {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id])
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("qr_codes")
+}
+
+model Certificate {
+  id            String      @id @default(uuid())
+  eventId       String
+  participantId String
+  event         Event       @relation(fields: [eventId], references: [id])
+  participant   Participant @relation(fields: [participantId], references: [id])
+  certificateNo String      @unique
+  fileUrl       String
+  qrVerifyCode  String      @unique
+  issuedAt      DateTime    @default(now())
+
+  @@map("certificates")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  type      String
+  status    String   @default("PENDING")
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+model File {
+  id        String   @id @default(uuid())
+  fileName  String
+  fileUrl   String
+  fileType  String
+  fileSize  Int
+  createdAt DateTime @default(now())
+
+  @@map("files")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  details   Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+model LoginLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  ipAddress String?
+  userAgent String?
+  loginAt   DateTime @default(now())
+
+  @@map("login_logs")
+}
+
+model TenantConfig {
+  id         String   @id @default(uuid())
+  opdId      String   @unique
+  opd        OPD      @relation(fields: [opdId], references: [id])
+  theme      Json?
+  logoUrl    String?
+  ssoEnabled Boolean  @default(false)
+  ssoConfig  Json?
+  updatedAt  DateTime @updatedAt
+
+  @@map("tenant_configs")
+}
+
+model SmtpConfig {
+  id          String    @id @default(uuid())
+  host        String
+  port        Int       @default(587)
+  username    String
+  password    String
+  encryption  String    @default("TLS")
+  senderName  String
+  senderEmail String
+  replyTo     String?
+  isActive    Boolean   @default(true)
+  lastTested  DateTime?
+  lastTestOk  Boolean   @default(false)
+  updatedAt   DateTime  @updatedAt
+
+  @@map("smtp_configs")
+}
+
+model SystemMetric {
+  id        String   @id @default(uuid())
+  metric    String
+  value     Float
+  timestamp DateTime @default(now())
+
+  @@map("system_metrics")
+}
+
+model AnomalyLog {
+  id          String   @id @default(uuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id])
+  type        String
+  description String
+  score       Float
+  details     Json?
+  createdAt   DateTime @default(now())
+
+  @@map("anomaly_logs")
+}
+
+model NotificationQueue {
+  id        String   @id @default(uuid())
+  type      String
+  payload   Json
+  status    String   @default("PENDING")
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_queue")
+}

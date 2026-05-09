@@ -1,0 +1,45 @@
+# SIHADIR MINSEL - Implementation Walkthrough
+
+I have completed the core implementation of **SIHADIR MINSEL**, a modern enterprise attendance system for the Minahasa Selatan government.
+
+## Key Accomplishments
+
+### 1. Full-Stack Foundation
+- **Backend**: NestJS modular architecture with Prisma ORM and PostgreSQL.
+- **Frontend**: Next.js 14 (App Router) with TypeScript and TailwindCSS.
+- **Infrastructure**: Dockerized setup with PostgreSQL, Redis (for Socket/Cache), and MinIO (for storage).
+
+### 2. Premium Design System
+- Implemented a "GovTech" aesthetic using **ShadCN UI** and **Framer Motion**.
+- Dark sidebar + light content theme, inspired by Vercel and Notion dashboards.
+- Fully responsive and mobile-first design.
+
+### 3. Core Features Implemented
+- **Authentication**: JWT-based login with Role-Based Access Control (RBAC).
+- **Event Management**: CRUD functionality for activities with geofencing and session parameters.
+- **Dynamic QR System**: Real-time refreshing QR codes to prevent "attendance fraud".
+- **GPS Validation**: Automatic geofencing calculation during attendance submission.
+- **Dashboard**: Real-time data visualization using Recharts and WebSockets.
+- **Certificates**: Automatic PDF generation with digital signature/verification QR.
+
+## Visual Demo (Mockups)
+
+````carousel
+![Dashboard](file:///C:/Users/hence/.gemini/antigravity/scratch/sihadir/docs/dashboard.png)
+<!-- slide -->
+![QR Scanner](file:///C:/Users/hence/.gemini/antigravity/scratch/sihadir/docs/scanner.png)
+<!-- slide -->
+![Event Detail](file:///C:/Users/hence/.gemini/antigravity/scratch/sihadir/docs/event_detail.png)
+````
+
+## Next Steps for Production
+1. **MinIO Setup**: Create the 'sihadir' bucket in MinIO console.
+2. **Database Migration**: Run `npx prisma migrate dev` in the backend directory.
+3. **Seeding**: Run `npm run seed` to create the initial Super Admin.
+
+> [!TIP]
+> Use the default credentials `admin@minsel.go.id` / `admin123` to log in after seeding.
+
+
+====================================================================================================================================================
+

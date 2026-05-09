@@ -1,0 +1,71 @@
+name: SIHADIR CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: sihadir_user
+          POSTGRES_PASSWORD: sihadir_password
+          POSTGRES_DB: sihadir_db_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+
+    - name: Install Backend Dependencies
+      run: |
+        cd apps/backend
+        npm install
+
+    - name: Prisma Generate & Migrate
+      run: |
+        cd apps/backend
+        npx prisma generate
+        # npx prisma migrate deploy
+      env:
+        DATABASE_URL: postgresql://sihadir_user:sihadir_password@localhost:5432/sihadir_db_test
+
+    - name: Build Backend
+      run: |
+        cd apps/backend
+        npm run build
+
+    - name: Install Frontend Dependencies
+      run: |
+        cd apps/frontend
+        npm install
+
+    - name: Build Frontend
+      run: |
+        cd apps/frontend
+        npm run build
+      env:
+        NEXT_PUBLIC_API_URL: https://api.minsel.go.id
+
+    - name: Docker Build (Backend)
+      run: docker build -t sihadir-backend ./apps/backend
+
+    - name: Docker Build (Frontend)
+      run: docker build -t sihadir-frontend ./apps/frontend
