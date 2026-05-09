@@ -20,8 +20,17 @@ export class EventsService {
     });
   }
 
-  async findAll() {
+  async findAll(user: any) {
+    const where: any = {};
+    
+    // If not SUPER_ADMIN, filter by opdId
+    const roleName = typeof user?.role === 'object' ? user?.role?.name : user?.role;
+    if (roleName === 'ADMIN_OPD' && user.opdId) {
+      where.organizerId = user.opdId;
+    }
+
     return this.prisma.event.findMany({
+      where,
       include: {
         opd: true,
         _count: {
