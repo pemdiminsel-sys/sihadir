@@ -11,6 +11,7 @@ import {
   ChevronRight, ChevronLeft, Check, MapPin, Calendar,
   Users, ToggleLeft, ToggleRight, AlertCircle, Globe, Video
 } from 'lucide-react';
+import MapPickerModal from '@/components/modals/MapPickerModal';
 
 const STEPS = [
   { id: 1, label: 'Informasi Kegiatan', icon: Info },
@@ -50,6 +51,7 @@ export default function CreateEventPage() {
   const [step, setStep] = useState(1);
   const [error, setError] = useState('');
   const [locationMode, setLocationMode] = useState<'MANUAL' | 'MAPS'>('MANUAL');
+  const [isMapOpen, setIsMapOpen] = useState(false);
 
   const [form, setForm] = useState({
     // Step 1
@@ -231,7 +233,7 @@ export default function CreateEventPage() {
                   ) : (
                     <div className="space-y-3">
                        <div className="h-40 bg-slate-100 rounded-2xl flex flex-col items-center justify-center border-2 border-dashed border-slate-300 group hover:border-blue-300 transition-all cursor-pointer"
-                        onClick={() => alert('Map Picker Modal — Integration with Google Maps / Leaflet')}>
+                        onClick={() => setIsMapOpen(true)}>
                           <MapPin className="w-8 h-8 text-slate-300 group-hover:text-blue-400 mb-2" />
                           <p className="text-xs font-bold text-slate-400 group-hover:text-blue-500 uppercase tracking-widest">Pilih dari Peta</p>
                        </div>
@@ -424,6 +426,17 @@ export default function CreateEventPage() {
           </button>
         </div>
       )}
+
+      <MapPickerModal 
+        isOpen={isMapOpen} 
+        onClose={() => setIsMapOpen(false)}
+        onSelect={(lat, lng) => {
+          set('latitude', lat.toString());
+          set('longitude', lng.toString());
+        }}
+        initialLat={parseFloat(form.latitude) || undefined}
+        initialLng={parseFloat(form.longitude) || undefined}
+      />
     </div>
   );
 }
