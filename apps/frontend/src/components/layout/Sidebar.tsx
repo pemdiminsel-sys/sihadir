@@ -134,7 +134,7 @@ export default function Sidebar() {
       <nav className="flex-1 px-4 py-6 space-y-8 overflow-y-auto custom-scrollbar relative z-10">
         {menuGroups.map((group, idx) => {
           const visibleItems = group.items.filter(item => {
-            if (item.adminOnly && user?.role !== 'SUPER_ADMIN') return false;
+            if (item.adminOnly && user?.role?.name !== 'SUPER_ADMIN') return false;
             return true;
           });
 
@@ -202,7 +202,7 @@ export default function Sidebar() {
               </div>
               <div className="overflow-hidden flex-1">
                 <p className="text-sm font-black text-white truncate">{user?.name || 'Administrator'}</p>
-                <p className="text-[10px] text-blue-400 truncate font-bold uppercase tracking-widest mt-0.5">{user?.role || 'System Role'}</p>
+                <p className="text-[10px] text-blue-400 truncate font-bold uppercase tracking-widest mt-0.5">{user?.role?.name || 'System Role'}</p>
               </div>
             </div>
             
