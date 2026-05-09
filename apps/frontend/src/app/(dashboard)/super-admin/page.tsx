@@ -76,6 +76,24 @@ const MODULES = [
     desc: 'SPBE, Regulasi, Maintenance',
     group: 'Operations',
   },
+  {
+    id: 'command-center', label: 'Command Center', icon: Globe,
+    badge: 'GOVTECH 2.0', badgeColor: 'violet',
+    desc: 'Monitoring Real-time & Geospasial',
+    group: 'GovTech 2.0',
+  },
+  {
+    id: 'approval', label: 'Persetujuan Peserta', icon: Shield,
+    badge: 'PREVIEW', badgeColor: 'blue',
+    desc: 'Manajemen Verifikasi & Approval',
+    group: 'GovTech 2.0',
+  },
+  {
+    id: 'analytics', label: 'Analitik SPBE', icon: Activity,
+    badge: 'GOVTECH 2.0', badgeColor: 'violet',
+    desc: 'Dashboard Skor & Kematangan SPBE',
+    group: 'GovTech 2.0',
+  },
 ];
 
 const BADGE_COLORS: Record<string, string> = {
@@ -322,6 +340,24 @@ export default function SuperAdminConsolePage() {
                   {active === 'flags' && <FeatureFlagsModule onAction={handleAction} />}
                   {active === 'compliance' && <ComplianceModule onAction={handleAction} />}
                   {active === 'opd' && <OpdManagementModule onAction={handleAction} />}
+                  {['command-center', 'approval', 'analytics'].includes(active) && (
+                    <div className="flex flex-col items-center justify-center py-32 text-center">
+                      <div className="w-24 h-24 rounded-[2rem] bg-blue-600/20 border border-blue-500/30 flex items-center justify-center mb-6">
+                        <Brain className="w-12 h-12 text-blue-400 animate-pulse" />
+                      </div>
+                      <h2 className="text-2xl font-black text-white mb-2">GovTech 2.0 Engine</h2>
+                      <p className="text-slate-500 max-w-md mx-auto">
+                        Kami sedang membangun algoritma masa depan untuk memberikan pengalaman terbaik di Minahasa Selatan. 
+                        Modul <span className="text-blue-400 font-bold">{activeModule.label}</span> akan segera tersedia.
+                      </p>
+                      <button 
+                        onClick={() => handleAction(activeModule.label)}
+                        className="mt-8 px-8 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest text-[10px] transition-all"
+                      >
+                        Lihat Roadmap
+                      </button>
+                    </div>
+                  )}
                 </motion.div>
               </AnimatePresence>
             </div>
