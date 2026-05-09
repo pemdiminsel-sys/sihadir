@@ -50,7 +50,7 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const pdfkit_1 = __importDefault(require("pdfkit"));
 const QRCode = __importStar(require("qrcode"));
-const uuid_1 = require("uuid");
+const crypto_1 = require("crypto");
 let ReportsService = class ReportsService {
     prisma;
     constructor(prisma) {
@@ -66,7 +66,7 @@ let ReportsService = class ReportsService {
         });
         if (!attendance)
             throw new common_1.NotFoundException('Data kehadiran tidak ditemukan');
-        const verifyCode = (0, uuid_1.v4)().substring(0, 8).toUpperCase();
+        const verifyCode = (0, crypto_1.randomUUID)().substring(0, 8).toUpperCase();
         const certificateNo = `CERT/${new Date().getFullYear()}/${verifyCode}`;
         const certificate = await this.prisma.certificate.create({
             data: {

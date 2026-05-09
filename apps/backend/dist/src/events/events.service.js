@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EventsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
-const uuid_1 = require("uuid");
+const crypto_1 = require("crypto");
 let EventsService = class EventsService {
     prisma;
     constructor(prisma) {
@@ -73,7 +73,7 @@ let EventsService = class EventsService {
             if (existing)
                 return existing;
         }
-        const token = (0, uuid_1.v4)();
+        const token = (0, crypto_1.randomUUID)();
         const expiresAt = event.qrType === 'STATIC'
             ? new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000)
             : new Date(Date.now() + 60 * 1000);

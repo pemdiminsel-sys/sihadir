@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import PDFDocument from 'pdfkit';
 import * as QRCode from 'qrcode';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class ReportsService {
@@ -19,7 +19,7 @@ export class ReportsService {
 
     if (!attendance) throw new NotFoundException('Data kehadiran tidak ditemukan');
 
-    const verifyCode = uuidv4().substring(0, 8).toUpperCase();
+    const verifyCode = randomUUID().substring(0, 8).toUpperCase();
     const certificateNo = `CERT/${new Date().getFullYear()}/${verifyCode}`;
 
     // Create Certificate record

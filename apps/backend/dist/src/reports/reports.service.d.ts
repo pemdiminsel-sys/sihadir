@@ -4,12 +4,12 @@ export declare class ReportsService {
     constructor(prisma: PrismaService);
     generateCertificate(attendanceId: string): Promise<{
         id: string;
-        eventId: string;
-        participantId: string;
         certificateNo: string;
         fileUrl: string;
         qrVerifyCode: string;
         issuedAt: Date;
+        eventId: string;
+        participantId: string;
     }>;
     generateCertificatePdf(attendanceId: string): Promise<Buffer>;
 }

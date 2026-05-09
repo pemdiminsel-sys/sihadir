@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class EventsService {
@@ -65,7 +65,7 @@ export class EventsService {
       if (existing) return existing;
     }
 
-    const token = uuidv4();
+    const token = randomUUID();
     const expiresAt = event.qrType === 'STATIC'
       ? new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000) // 10 years for static
       : new Date(Date.now() + 60 * 1000); // 1 minute expiry
