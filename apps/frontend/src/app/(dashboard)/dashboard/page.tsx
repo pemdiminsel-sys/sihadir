@@ -31,20 +31,18 @@ import {
 } from 'recharts';
 
 const stats = [
-  { label: 'Kegiatan Aktif', value: '42', icon: Activity, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', trend: '+12%', up: true, pulse: true },
-  { label: 'Peserta Hadir', value: '1.284', icon: Users, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', trend: '+18%', up: true, pulse: true },
-  { label: 'Tingkat Kehadiran', value: '94,2%', icon: CheckCircle2, color: 'text-violet-400', bg: 'bg-violet-500/10', border: 'border-violet-500/20', trend: '-2%', up: false, pulse: false },
-  { label: 'OPD Aktif', value: '28', icon: Building2, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', trend: '+4%', up: true, pulse: false },
+  { label: 'Kegiatan Aktif', value: '0', icon: Activity, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', trend: '0%', up: true, pulse: false },
+  { label: 'Peserta Hadir', value: '0', icon: Users, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', trend: '0%', up: true, pulse: false },
+  { label: 'Tingkat Kehadiran', value: '0%', icon: CheckCircle2, color: 'text-violet-400', bg: 'bg-violet-500/10', border: 'border-violet-500/20', trend: '0%', up: true, pulse: false },
+  { label: 'OPD Aktif', value: '1', icon: Building2, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', trend: 'Initial', up: true, pulse: false },
 ];
 
 const chartData = [
-  { name: '08:00', value: 100 },
-  { name: '09:00', value: 400 },
-  { name: '10:00', value: 800 },
-  { name: '11:00', value: 1200 },
-  { name: '12:00', value: 1100 },
-  { name: '13:00', value: 1500 },
-  { name: '14:00', value: 1800 },
+  { name: '08:00', value: 0 },
+  { name: '10:00', value: 0 },
+  { name: '12:00', value: 0 },
+  { name: '14:00', value: 0 },
+  { name: '16:00', value: 0 },
 ];
 
 export default function DashboardPage() {
@@ -207,12 +205,12 @@ export default function DashboardPage() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.5 }}
                 >
-                  {[
-                    { name: 'Dr. Ahmad Susanto', action: 'Check-in via QR Code', time: 'Baru saja', valid: true },
-                    { name: 'Siti Rahayu, S.Sos', action: 'Kirim Foto Selfie', time: '2 menit lalu', valid: true },
-                    { name: 'Budi Santoso', action: 'Check-in Terlambat', time: '5 menit lalu', valid: false },
-                    { name: 'Indah Pertiwi', action: 'Check-in via GPS', time: '12 menit lalu', valid: true },
-                  ].map((item, idx) => (
+                  { [].length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center">
+                      <Clock className="w-8 h-8 text-slate-200 mb-2" />
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Belum ada aktivitas hari ini</p>
+                    </div>
+                  ) : [].map((item, idx) => (
                     <div key={idx} className="flex gap-4 items-start group">
                       <div className="relative">
                         <div className={`w-2 h-2 mt-1.5 rounded-full ${item.valid ? 'bg-emerald-500' : 'bg-amber-500'} ring-4 ring-slate-50`}></div>

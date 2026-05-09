@@ -22,6 +22,8 @@ import {
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/useAuthStore';
 import Image from 'next/image';
+import { useState } from 'react';
+import ComingSoonModal from '../modals/ComingSoonModal';
 
 interface MenuItem {
   icon: any;
@@ -31,6 +33,7 @@ interface MenuItem {
   isGlowing?: boolean;
   adminOnly?: boolean;
   badge?: string;
+  comingSoon?: boolean;
 }
 
 
@@ -39,14 +42,14 @@ const menuGroups: { group: string; items: MenuItem[] }[] = [
     group: 'Operasional',
     items: [
       { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-      { icon: Globe, label: 'Command Center', href: '/command-center', premium: true, isGlowing: true },
+      { icon: Globe, label: 'Command Center', href: '#', premium: true, isGlowing: true, comingSoon: true },
     ]
   },
   {
     group: 'Manajemen Kegiatan',
     items: [
       { icon: Calendar, label: 'Daftar Kegiatan', href: '/events' },
-      { icon: ClipboardList, label: 'Persetujuan Peserta', href: '/events', badge: '●' },
+      { icon: ClipboardList, label: 'Persetujuan Peserta', href: '#', badge: '●', comingSoon: true },
       { icon: Users, label: 'Direktori Peserta', href: '/participants' },
       { icon: Award, label: 'Sertifikat Digital', href: '/certificates' },
     ]
@@ -54,7 +57,7 @@ const menuGroups: { group: string; items: MenuItem[] }[] = [
   {
     group: 'Analitik & Laporan',
     items: [
-      { icon: Zap, label: 'Analitik SPBE', href: '/spbe-analytics' },
+      { icon: Zap, label: 'Analitik SPBE', href: '#', comingSoon: true },
       { icon: BarChart3, label: 'Laporan Komprehensif', href: '/reports' },
       { icon: ShieldCheck, label: 'Audit Trail', href: '/audit-logs' },
     ]
@@ -74,14 +77,30 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, user } = useAuthStore();
+  const [comingSoon, setComingSoon] = useState<{ isOpen: boolean; name: string }>({ 
+    isOpen: false, 
+    name: '' 
+  });
 
   const handleLogout = () => {
     logout();
     router.push('/login');
   };
 
+  const handleMenuClick = (e: React.MouseEvent, item: MenuItem) => {
+    if (item.comingSoon) {
+      e.preventDefault();
+      setComingSoon({ isOpen: true, name: item.label });
+    }
+  };
+
   return (
     <div className="w-80 h-screen bg-[#070b19] text-slate-400 flex flex-col border-r border-white/5 relative overflow-hidden">
+      <ComingSoonModal 
+        isOpen={comingSoon.isOpen} 
+        onClose={() => setComingSoon({ ...comingSoon, isOpen: false })} 
+        featureName={comingSoon.name} 
+      />
       {/* Background Glow Effects */}
       <div className="absolute top-0 left-0 w-full h-64 bg-blue-600/10 blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-full h-64 bg-emerald-600/5 blur-[100px] pointer-events-none" />
@@ -129,8 +148,9 @@ export default function Sidebar() {
                   const isActive = pathname === item.href;
                   return (
                     <Link
-                      key={item.href}
+                      key={item.label}
                       href={item.href}
+                      onClick={(e) => handleMenuClick(e, item)}
                       className={cn(
                         "flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative",
                         isActive 
@@ -195,7 +215,7 @@ export default function Sidebar() {
             </button>
           </div>
         </div>
-      </div>
+      </div>v>
       
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
