@@ -89,7 +89,7 @@ export default function Topbar() {
             </div>
             <div className="hidden md:block text-left">
               <p className="text-xs font-bold text-slate-900 leading-tight">{user?.name || 'Administrator'}</p>
-              <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">{user?.role || 'Admin OPD'}</p>
+              <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">{user?.role?.name || 'Admin OPD'}</p>
             </div>
             <ChevronDown className="w-4 h-4 text-slate-400 hidden md:block" />
           </button>
