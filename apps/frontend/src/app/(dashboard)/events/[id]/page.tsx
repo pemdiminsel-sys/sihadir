@@ -415,7 +415,7 @@ export default function EventDetailPage() {
           <EditEventModal 
             event={event} 
             onClose={() => setShowEditModal(false)} 
-            onSave={(data) => updateMut.mutate(data)}
+            onSave={(data: any) => updateMut.mutate(data)}
             isSaving={updateMut.isPending}
           />
         )}
