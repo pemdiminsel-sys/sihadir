@@ -215,7 +215,7 @@ export default function Sidebar() {
             </button>
           </div>
         </div>
-      </div>v>
+      </div>
       
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
