@@ -60,7 +60,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="role">Role</Label>
-                  <Input id="role" defaultValue={user?.role || ''} className="rounded-xl bg-slate-50 font-mono" disabled />
+                  <Input id="role" defaultValue={user?.role?.name || ''} className="rounded-xl bg-slate-50 font-mono" disabled />
                 </div>
               </div>
               <div className="flex justify-end pt-4">
