@@ -31,11 +31,17 @@ import { BullModule } from '@nestjs/bull';
     NotificationsModule,
     RegistrationsModule,
     SmtpModule,
-    BullModule.forRoot({
+    process.env.REDIS_HOST ? BullModule.forRoot({
       redis: {
-        host: process.env.REDIS_HOST || 'localhost',
+        host: process.env.REDIS_HOST,
         port: parseInt(process.env.REDIS_PORT || '6379'),
       },
+    }) : BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
+      // Disable automatic connection in production if no host
     }),
   ],
   controllers: [AppController],

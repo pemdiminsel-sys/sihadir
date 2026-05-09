@@ -11,7 +11,12 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
 
   // Enable CORS
-  app.enableCors();
+  // Enable CORS
+  app.enableCors({
+    origin: true, // Mengizinkan semua origin di tahap awal ini
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
 
   // Global Validation Pipe
   app.useGlobalPipes(new ValidationPipe({

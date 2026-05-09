@@ -43,10 +43,15 @@ exports.AppModule = AppModule = __decorate([
             notifications_module_1.NotificationsModule,
             registrations_module_1.RegistrationsModule,
             smtp_module_1.SmtpModule,
-            bull_1.BullModule.forRoot({
+            process.env.REDIS_HOST ? bull_1.BullModule.forRoot({
                 redis: {
-                    host: process.env.REDIS_HOST || 'localhost',
+                    host: process.env.REDIS_HOST,
                     port: parseInt(process.env.REDIS_PORT || '6379'),
+                },
+            }) : bull_1.BullModule.forRoot({
+                redis: {
+                    host: 'localhost',
+                    port: 6379,
                 },
             }),
         ],

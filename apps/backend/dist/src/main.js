@@ -8,7 +8,11 @@ const all_exceptions_filter_1 = require("./common/filters/all-exceptions.filter"
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.useGlobalFilters(new all_exceptions_filter_1.AllExceptionsFilter());
-    app.enableCors();
+    app.enableCors({
+        origin: true,
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+        credentials: true,
+    });
     app.useGlobalPipes(new common_1.ValidationPipe({
         whitelist: true,
         transform: true,
