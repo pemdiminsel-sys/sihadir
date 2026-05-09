@@ -1,28 +1,22 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MapPin, Check, Search, Navigation } from 'lucide-react';
+import { X, MapPin, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// Fix for Leaflet default icon issues in Webpack/Next.js
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-
-const DefaultIcon = L.icon({
-    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
+// We wrap the entire Leaflet logic in a dynamically imported component
+// to ensure no Leaflet code runs during SSR.
+const MapInner = dynamic(() => import('./MapInner'), { 
+    ssr: false,
+    loading: () => (
+        <div className="w-full h-full bg-slate-100 flex flex-col items-center justify-center">
+            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Memuat Peta...</p>
+        </div>
+    )
 });
-L.Marker.prototype.options.icon = DefaultIcon;
-
-// Dynamic import of Leaflet components to avoid SSR errors
-const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
-const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
-const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
-const useMapEvents = dynamic(() => import('react-leaflet').then(mod => mod.useMapEvents), { ssr: false });
 
 interface MapPickerModalProps {
   isOpen: boolean;
@@ -32,22 +26,8 @@ interface MapPickerModalProps {
   initialLng?: number;
 }
 
-function LocationMarker({ position, setPosition }: { position: [number, number], setPosition: (pos: [number, number]) => void }) {
-  // @ts-ignore - useMapEvents is dynamically loaded
-  const map = useMapEvents({
-    click(e: any) {
-      setPosition([e.latlng.lat, e.latlng.lng]);
-    },
-  });
-
-  return position ? (
-    // @ts-ignore
-    <Marker position={position} />
-  ) : null;
-}
-
 export default function MapPickerModal({ isOpen, onClose, onSelect, initialLat, initialLng }: MapPickerModalProps) {
-  const [position, setPosition] = useState<[number, number]>([initialLat || 1.15, initialLng || 124.5]); // Default to Minsel area
+  const [position, setPosition] = useState<[number, number]>([initialLat || 1.15, initialLng || 124.5]);
 
   const handleConfirm = () => {
     onSelect(position[0], position[1]);
@@ -65,7 +45,7 @@ export default function MapPickerModal({ isOpen, onClose, onSelect, initialLat, 
             className="w-full max-w-4xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col h-[80vh]"
           >
             {/* Header */}
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white relative z-10">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white relative z-20">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/30">
                   <MapPin className="w-5 h-5 text-white" />
@@ -84,26 +64,11 @@ export default function MapPickerModal({ isOpen, onClose, onSelect, initialLat, 
             </div>
 
             {/* Map Area */}
-            <div className="flex-1 relative bg-slate-50 overflow-hidden">
-                <div className="absolute inset-0 z-0">
-                    {/* @ts-ignore */}
-                    <MapContainer 
-                        center={position} 
-                        zoom={13} 
-                        style={{ height: '100%', width: '100%' }}
-                        scrollWheelZoom={true}
-                    >
-                        {/* @ts-ignore */}
-                        <TileLayer
-                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        />
-                        <LocationMarker position={position} setPosition={setPosition} />
-                    </MapContainer>
-                </div>
+            <div className="flex-1 relative bg-slate-50 overflow-hidden z-10">
+                <MapInner position={position} setPosition={setPosition} />
 
                 {/* Overlay Info */}
-                <div className="absolute bottom-6 left-6 right-6 z-10 flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="absolute bottom-6 left-6 right-6 z-[1000] flex flex-col md:flex-row gap-4 items-center justify-between">
                     <div className="bg-white/90 backdrop-blur-md p-4 rounded-2xl border border-white shadow-xl flex items-center gap-4 w-full md:w-auto">
                         <div className="flex items-center gap-3">
                             <div className="text-left">
