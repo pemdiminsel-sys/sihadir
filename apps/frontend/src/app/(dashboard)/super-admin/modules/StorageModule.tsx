@@ -157,9 +157,6 @@ export default function StorageModule({ onAction }: { onAction: (name: string) =
             </motion.div>
           ))}
         </div>
-      )}motion.div>
-          ))}
-        </div>
       )}
 
       {tab === 'queue' && (
