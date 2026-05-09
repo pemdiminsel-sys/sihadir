@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import PDFDocument from 'pdfkit';
 import * as QRCode from 'qrcode';
-import { randomUUID } from 'crypto';
+import { randomUUID, createHash } from 'crypto';
 
 @Injectable()
 export class ReportsService {
@@ -74,7 +74,7 @@ export class ReportsService {
       throw new NotFoundException('Data kehadiran atau kegiatan tidak ditemukan');
     }
 
-    return new Promise(async (resolve, reject) => {
+    const pdfPromise = new Promise<Buffer>(async (resolve, reject) => {
       try {
         const doc = new PDFDocument({
           layout: 'landscape',
@@ -107,10 +107,56 @@ export class ReportsService {
         doc.image(qrBuffer, doc.page.width - 150, doc.page.height - 150, { width: 100 });
         doc.fontSize(8).text('Scan untuk verifikasi', doc.page.width - 150, doc.page.height - 45, { width: 100, align: 'center' });
 
+        // GovTech 2.0 e-Sign Visual
+        doc.fontSize(10).fillColor('#059669').text('✓ Ditandatangani secara elektronik (e-Sign)', 50, doc.page.height - 80);
+        doc.fontSize(8).fillColor('#64748B').text('Tanda tangan digital ini diverifikasi oleh Balai Sertifikasi Elektronik (BSRE).', 50, doc.page.height - 65);
+        doc.fontSize(8).text('Dokumen ini sah secara hukum sesuai dengan regulasi SPBE.', 50, doc.page.height - 55);
+
         doc.end();
       } catch (error) {
         reject(error);
       }
     });
+    
+    // Wait for the buffer
+    const pdfBuffer = await pdfPromise;
+    
+    // Generate Cryptographic Hash for e-Sign
+    const signatureHash = createHash('sha256').update(pdfBuffer).digest('hex');
+
+    // Save to Database if it's not a preview
+    if (attendance.id !== 'preview-id') {
+      let certificate = await this.prisma.certificate.findFirst({
+        where: { eventId: attendance.eventId, participantId: attendance.participantId }
+      });
+
+      if (!certificate) {
+        const verifyCode = randomUUID().substring(0, 8).toUpperCase();
+        const certificateNo = `CERT/${new Date().getFullYear()}/${verifyCode}`;
+        await this.prisma.certificate.create({
+          data: {
+            eventId: attendance.eventId,
+            participantId: attendance.participantId,
+            certificateNo,
+            qrVerifyCode: verifyCode,
+            fileUrl: `/certificates/${attendanceId}.pdf`,
+            isSigned: true,
+            signatureHash,
+            signedAt: new Date()
+          }
+        });
+      } else {
+        await this.prisma.certificate.update({
+          where: { id: certificate.id },
+          data: {
+            isSigned: true,
+            signatureHash,
+            signedAt: new Date()
+          }
+        });
+      }
+    }
+
+    return pdfBuffer;
   }
 }

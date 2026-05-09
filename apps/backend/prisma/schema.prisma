@@ -226,6 +226,11 @@ model Certificate {
   fileUrl       String
   qrVerifyCode  String      @unique
   issuedAt      DateTime    @default(now())
+  
+  // GovTech 2.0 e-Sign fields
+  isSigned      Boolean     @default(false)
+  signatureHash String?
+  signedAt      DateTime?
 
   @@map("certificates")
 }
