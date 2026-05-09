@@ -7,10 +7,15 @@ export class EventsService {
   constructor(private prisma: PrismaService) {}
 
   async create(data: any) {
+    const { 
+      notifyEmail, notifyWa, notifyApp, // Filter out non-Prisma fields
+      ...eventData 
+    } = data;
+
     return this.prisma.event.create({
       data: {
-        ...data,
-        status: 'PUBLISHED',
+        ...eventData,
+        status: eventData.status || 'PUBLISHED',
       },
     });
   }

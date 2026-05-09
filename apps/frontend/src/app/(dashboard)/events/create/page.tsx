@@ -74,7 +74,7 @@ export default function CreateEventPage() {
     notifyEmail: true, notifyWa: false, notifyApp: true,
   });
 
-  const isAdminOPD = user?.role?.name === 'ADMIN_OPD';
+  const isAdminOPD = (typeof user?.role === 'object' ? user?.role?.name : user?.role) === 'ADMIN_OPD';
 
   useEffect(() => {
     if (isAdminOPD && user?.opdId) {
