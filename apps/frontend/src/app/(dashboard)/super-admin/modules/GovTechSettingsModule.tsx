@@ -2,13 +2,61 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Key, Link as LinkIcon, Lock, Copy, RefreshCw, Layers } from 'lucide-react';
+import { Shield, Key, Link as LinkIcon, Lock, Copy, RefreshCw, Layers, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import api from '@/services/api';
 
 export default function GovTechSettingsModule({ onAction }: { onAction: (action: string) => void }) {
+  const queryClient = useQueryClient();
   const [mfaEnabled, setMfaEnabled] = useState(false);
+
+  const { data: apiKeys, isLoading: isLoadingKeys } = useQuery({
+    queryKey: ['govtech-keys'],
+    queryFn: async () => {
+      const res = await api.get('/govtech/api-keys');
+      return res.data;
+    }
+  });
+
+  const { data: ledger } = useQuery({
+    queryKey: ['govtech-ledger'],
+    queryFn: async () => {
+      const res = await api.get('/govtech/ledger/genesis');
+      return res.data;
+    }
+  });
+
+  const mfaMutation = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      await api.post('/govtech/mfa/toggle', { enabled });
+    },
+    onSuccess: (_, enabled) => {
+      setMfaEnabled(enabled);
+    }
+  });
+
+  const keyMutation = useMutation({
+    mutationFn: async (name: string) => {
+      await api.post('/govtech/api-keys', { name });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['govtech-keys'] });
+    }
+  });
+
+  const handleMfaToggle = () => {
+    mfaMutation.mutate(!mfaEnabled);
+  };
+
+  const handleGenerateKey = () => {
+    const name = prompt('Masukkan nama untuk integrasi API baru:', 'Portal Integrasi SPBE');
+    if (name) {
+      keyMutation.mutate(name);
+    }
+  };
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
@@ -38,10 +86,11 @@ export default function GovTechSettingsModule({ onAction }: { onAction: (action:
               type="button"
               role="switch"
               aria-checked={mfaEnabled}
-              onClick={() => setMfaEnabled(!mfaEnabled)}
+              onClick={handleMfaToggle}
+              disabled={mfaMutation.isPending}
               className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${
                 mfaEnabled ? 'bg-blue-600' : 'bg-slate-700'
-              }`}
+              } ${mfaMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <span
                 className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform ${
@@ -66,11 +115,11 @@ export default function GovTechSettingsModule({ onAction }: { onAction: (action:
           <div className="p-4 rounded-xl bg-slate-900 border border-white/10 space-y-3">
             <div className="flex justify-between items-center text-[10px] uppercase tracking-widest font-bold">
               <span className="text-slate-500">Latest Genesis Hash</span>
-              <span className="text-emerald-400 flex items-center gap-1"><Lock className="w-3 h-3" /> SECURE</span>
+              <span className="text-emerald-400 flex items-center gap-1"><Lock className="w-3 h-3" /> {ledger?.status || 'SECURE'}</span>
             </div>
             <div className="flex items-center gap-2">
               <code className="text-xs text-violet-300 bg-violet-500/10 px-2 py-1.5 rounded truncate flex-1 font-mono border border-violet-500/20">
-                8f4e2...d91a7c
+                {ledger?.hash || 'Loading cryptographic chain...'}
               </code>
               <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-slate-400 hover:text-white">
                 <Copy className="w-3 h-3" />
@@ -93,31 +142,35 @@ export default function GovTechSettingsModule({ onAction }: { onAction: (action:
         </div>
 
         <div className="space-y-4">
-          {[
-            { name: 'BKPSDM Sync Portal', key: 'sk_live_9f8d...2jd8', created: '2026-04-15' },
-            { name: 'Portal Minsel SuperApp', key: 'sk_live_38dn...f93l', created: '2026-05-01' },
-          ].map((api, i) => (
-            <div key={i} className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-slate-900 border border-white/10">
-              <div>
-                <p className="text-sm font-bold text-white">{api.name}</p>
-                <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest">Created: {api.created}</p>
+          {isLoadingKeys ? (
+            <div className="flex justify-center p-4"><Loader2 className="w-6 h-6 animate-spin text-emerald-500" /></div>
+          ) : apiKeys?.length === 0 ? (
+            <p className="text-sm text-slate-500 text-center py-4">Belum ada API Key yang terdaftar.</p>
+          ) : (
+            apiKeys?.map((api: any) => (
+              <div key={api.id} className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-slate-900 border border-white/10">
+                <div>
+                  <p className="text-sm font-bold text-white">{api.name}</p>
+                  <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest">Created: {new Date(api.createdAt).toLocaleDateString()}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <code className="text-xs text-slate-300 bg-black px-3 py-2 rounded-lg font-mono border border-white/10 w-64 text-center truncate">
+                    {api.key}
+                  </code>
+                  <Button size="icon" variant="ghost" className="rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10" onClick={() => prompt('Aksi hapus / refresh API ini dibatasi.', 'OK')}>
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <code className="text-xs text-slate-300 bg-black px-3 py-2 rounded-lg font-mono border border-white/10 w-48 text-center">
-                  {api.key}
-                </code>
-                <Button size="icon" variant="ghost" className="rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10">
-                  <RefreshCw className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
 
           <Button 
             className="w-full h-12 mt-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold gap-2"
-            onClick={() => onAction('Generate API Key')}
+            onClick={handleGenerateKey}
+            disabled={keyMutation.isPending}
           >
-            <Key className="w-4 h-4" />
+            {keyMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Key className="w-4 h-4" />}
             Generate New API Key
           </Button>
         </div>

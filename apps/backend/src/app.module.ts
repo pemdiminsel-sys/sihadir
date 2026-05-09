@@ -15,9 +15,13 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { RegistrationsModule } from './registrations/registrations.module';
 import { SmtpModule } from './smtp/smtp.module';
 import { BullModule } from '@nestjs/bull';
+import { GovTechModule } from './govtech/govtech.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -31,6 +35,7 @@ import { BullModule } from '@nestjs/bull';
     NotificationsModule,
     RegistrationsModule,
     SmtpModule,
+    GovTechModule,
     process.env.REDIS_HOST ? BullModule.forRoot({
       redis: {
         host: process.env.REDIS_HOST,
