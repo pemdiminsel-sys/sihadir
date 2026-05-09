@@ -9,8 +9,11 @@ import {
   FileSpreadsheet,
   CheckCircle2,
   XCircle,
-  MapPin
+  MapPin,
+  Printer,
+  ChevronLeft
 } from 'lucide-react';
+import OfficialHeader from '@/components/reports/OfficialHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -42,6 +45,67 @@ const mockAnomalyReports = [
 ];
 
 export default function ReportsPage() {
+  const [printMode, setPrintMode] = useState(false);
+
+  if (printMode) {
+    return (
+      <div className="bg-white min-h-screen p-0 md:p-8 animate-in fade-in duration-500">
+        <div className="max-w-5xl mx-auto bg-white shadow-2xl border border-slate-100 p-12 relative">
+          <Button 
+            variant="ghost" 
+            className="absolute top-4 right-4 print:hidden gap-2"
+            onClick={() => setPrintMode(false)}
+          >
+            <ChevronLeft className="w-4 h-4" /> Kembali
+          </Button>
+          
+          <Button 
+            className="absolute top-4 right-32 print:hidden gap-2 bg-blue-600 hover:bg-blue-700"
+            onClick={() => window.print()}
+          >
+            <Printer className="w-4 h-4" /> Cetak Sekarang
+          </Button>
+
+          <OfficialHeader reportTitle="LAPORAN REKAPITULASI KEHADIRAN PER INSTANSI" />
+          
+          <div className="mt-8">
+            <Table className="border border-slate-200">
+              <TableHeader>
+                <TableRow className="bg-slate-50">
+                  <TableHead className="font-bold border">Instansi / OPD</TableHead>
+                  <TableHead className="text-center font-bold border">Total Pegawai</TableHead>
+                  <TableHead className="text-center font-bold border">Hadir Aktif</TableHead>
+                  <TableHead className="text-center font-bold border">Persentase</TableHead>
+                  <TableHead className="text-center font-bold border">Keterangan</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mockGeneralReports.map((row) => (
+                  <TableRow key={row.id}>
+                    <TableCell className="border font-medium">{row.opd}</TableCell>
+                    <TableCell className="border text-center">{row.totalPegawai}</TableCell>
+                    <TableCell className="border text-center font-bold">{row.hadir}</TableCell>
+                    <TableCell className="border text-center font-mono font-bold">{row.persentase}</TableCell>
+                    <TableCell className="border text-center">{row.status}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
+            <div className="mt-16 flex justify-end">
+                <div className="text-center pr-12">
+                    <p className="text-sm font-medium">Amurang, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                    <p className="text-sm font-bold mt-1">Kepala Dinas Kominfo,</p>
+                    <div className="h-20" />
+                    <p className="text-sm font-black underline">TUSRIANTO RUMENGAN, SSTP, M.Si</p>
+                    <p className="text-xs font-bold text-slate-500">NIP. 19820512 200012 1 001</p>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="space-y-8 pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -55,7 +119,14 @@ export default function ReportsPage() {
             onClick={() => toast.success('Memproses Export Rekapitulasi ke Excel...')}
           >
             <FileSpreadsheet className="h-5 w-5" />
-            Export Rekapitulasi (Excel)
+            Export Excel
+          </Button>
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700 rounded-xl gap-2 h-12 px-6 shadow-lg shadow-blue-600/20"
+            onClick={() => setPrintMode(true)}
+          >
+            <Printer className="h-5 w-5" />
+            Cetak Laporan (KOP)
           </Button>
         </div>
       </div>

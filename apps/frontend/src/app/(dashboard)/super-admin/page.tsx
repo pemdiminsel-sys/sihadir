@@ -7,6 +7,7 @@ import {
   Activity, Clock, ChevronRight, Globe, AlertTriangle, CheckCircle2,
   Layers, Database, Brain, Building2
 } from 'lucide-react';
+import Link from 'next/link';
 
 import InfrastructureModule from './modules/InfrastructureModule';
 import SecurityModule from './modules/SecurityModule';
@@ -262,16 +263,16 @@ export default function SuperAdminConsolePage() {
             <div className="border-t border-white/[0.06] pt-4">
               <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.25em] px-3 mb-2">Quick Links</p>
               {[
-                { label: 'Users Management', icon: Users },
-                { label: 'Audit Trail', icon: Layers },
-                { label: 'Command Center', icon: Globe },
+                { label: 'Users Management', icon: Users, href: '/super-admin/users' },
+                { label: 'Audit Trail', icon: Layers, href: '/audit-logs' },
+                { label: 'Command Center', icon: Globe, href: '/command-center' },
               ].map(link => (
-                <button key={link.label} onClick={() => handleAction(link.label)}
+                <Link key={link.label} href={link.href}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 text-slate-500 hover:text-slate-300 transition-all group text-left">
                   <link.icon className="w-4 h-4 shrink-0" />
                   <span className="text-xs font-bold">{link.label}</span>
                   <ChevronRight className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                </button>
+                </Link>
               ))}
             </div>
           </nav>
