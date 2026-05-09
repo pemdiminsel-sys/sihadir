@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Key, Link as LinkIcon, Lock, Copy, RefreshCw, Layers } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -35,7 +34,21 @@ export default function GovTechSettingsModule({ onAction }: { onAction: (action:
               <p className="text-sm font-bold text-white">Require MFA for Admins</p>
               <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Status: {mfaEnabled ? 'Enforced' : 'Optional'}</p>
             </div>
-            <Switch checked={mfaEnabled} onCheckedChange={setMfaEnabled} className="data-[state=checked]:bg-blue-600" />
+            <button
+              type="button"
+              role="switch"
+              aria-checked={mfaEnabled}
+              onClick={() => setMfaEnabled(!mfaEnabled)}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${
+                mfaEnabled ? 'bg-blue-600' : 'bg-slate-700'
+              }`}
+            >
+              <span
+                className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform ${
+                  mfaEnabled ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
         </Card>
 
