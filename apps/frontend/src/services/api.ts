@@ -1,8 +1,11 @@
 import axios from 'axios';
 import { useAuthStore } from '@/store/useAuthStore';
 
+const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+console.log('SIHADIR API BaseURL:', baseURL);
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+  baseURL,
 });
 
 api.interceptors.request.use((config) => {

@@ -46,7 +46,9 @@ export default function LoginPage() {
         title: 'Login Berhasil',
         description: `Selamat datang kembali, ${user.name}`,
       });
-      router.push('/dashboard');
+      
+      // Menggunakan window.location untuk memaksa refresh state dashboard
+      window.location.href = '/dashboard';
     } catch (error: any) {
       toast({
         variant: 'destructive',
