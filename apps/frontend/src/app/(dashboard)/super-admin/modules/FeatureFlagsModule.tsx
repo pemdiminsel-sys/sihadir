@@ -18,9 +18,9 @@ const FLAGS = [
 
 /* ─── AI Config ─── */
 const AI_MODELS = [
-  { name: 'Anomaly Detection Engine', model: 'Custom ML v2.1', provider: 'Internal', status: 'ACTIVE', calls24h: 4281 },
-  { name: 'GPS Fraud Classifier', model: 'XGBoost + Rule Engine', provider: 'Internal', status: 'ACTIVE', calls24h: 4281 },
-  { name: 'NLP Report Generator', model: 'GPT-4o', provider: 'OpenAI', status: 'STANDBY', calls24h: 42 },
+  { name: 'Anomaly Detection Engine', model: 'Custom ML v2.1', provider: 'Internal', status: 'ACTIVE', calls24h: 0 },
+  { name: 'GPS Fraud Classifier', model: 'XGBoost + Rule Engine', provider: 'Internal', status: 'ACTIVE', calls24h: 0 },
+  { name: 'NLP Report Generator', model: 'GPT-4o', provider: 'OpenAI', status: 'STANDBY', calls24h: 0 },
   { name: 'Face Verification', model: 'FaceNet v1.0', provider: 'Internal', status: 'DISABLED', calls24h: 0 },
 ];
 
@@ -30,7 +30,7 @@ const RISK_COLORS: Record<string, string> = {
   LOW: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
 };
 
-export default function FeatureFlagsModule() {
+export default function FeatureFlagsModule({ onAction }: { onAction: (name: string) => void }) {
   const [flags, setFlags] = useState(FLAGS);
   const [tab, setTab] = useState<'flags' | 'ai' | 'regional'>('flags');
 
@@ -129,7 +129,7 @@ export default function FeatureFlagsModule() {
           {[
             { section: 'Identitas Daerah', items: [
               { label: 'Nama Daerah', value: 'Kabupaten Minahasa Selatan', editable: false },
-              { label: 'Kode Wilayah (Kemendagri)', value: '71.07', editable: false },
+              { label: 'Kode Wilayah (Kemendagri)', value: '71.05', editable: false },
               { label: 'Zona Waktu', value: 'Asia/Makassar (WITA, UTC+8)', editable: true },
               { label: 'Bahasa Default', value: 'Bahasa Indonesia', editable: true },
             ]},
@@ -152,7 +152,10 @@ export default function FeatureFlagsModule() {
                     <div className="flex items-center gap-2">
                       <p className="text-xs font-black text-white text-right">{item.value}</p>
                       {item.editable && (
-                        <button className="w-6 h-6 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                        <button 
+                          onClick={() => onAction(`Pengaturan ${item.label}`)}
+                          className="w-6 h-6 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                        >
                           <Sliders className="w-3 h-3 text-slate-400" />
                         </button>
                       )}

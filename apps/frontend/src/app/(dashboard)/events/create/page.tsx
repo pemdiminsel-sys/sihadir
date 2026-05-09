@@ -1,14 +1,13 @@
-'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import api from '@/services/api';
+import { useAuthStore } from '@/store/useAuthStore';
 import {
   Info, Settings2, Clock, QrCode, Bell, Send,
   ChevronRight, ChevronLeft, Check, MapPin, Calendar,
-  Users, ToggleLeft, ToggleRight, AlertCircle
+  Users, ToggleLeft, ToggleRight, AlertCircle, Globe, Video
 } from 'lucide-react';
 
 const STEPS = [
@@ -45,13 +44,18 @@ function FieldRow({ label, desc, enabled, onToggle }: { label: string; desc: str
 
 export default function CreateEventPage() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const [step, setStep] = useState(1);
   const [error, setError] = useState('');
+  const [locationMode, setLocationMode] = useState<'MANUAL' | 'MAPS'>('MANUAL');
 
   const [form, setForm] = useState({
     // Step 1
     title: '', description: '', organizerId: '', venue: '',
+    latitude: '', longitude: '',
     startTime: '', endTime: '', category: 'RAPAT', bannerUrl: '',
+    attendanceMode: 'OFFLINE' as 'OFFLINE' | 'ONLINE' | 'HYBRID',
+    onlineUrl: '',
     // Step 2
     requiresRegistration: false, requiresApproval: false, isPublic: true,
     maxParticipants: '', hasWaitingList: false, invitationOnly: false, multiSession: false,
@@ -64,8 +68,15 @@ export default function CreateEventPage() {
     qrType: 'DYNAMIC', dynamicQr: true, requireSelfie: false, qrRefreshInterval: 60,
     // Step 5
     notifyEmail: true, notifyWa: false, notifyApp: true,
-    // Step 6 — publish or draft
   });
+
+  const isAdminOPD = user?.role?.name === 'ADMIN_OPD';
+
+  useEffect(() => {
+    if (isAdminOPD && user?.opdId) {
+      setForm(f => ({ ...f, organizerId: user.opdId! }));
+    }
+  }, [isAdminOPD, user]);
 
   const set = (key: string, val: any) => setForm(f => ({ ...f, [key]: val }));
   const tog = (key: string) => setForm(f => ({ ...f, [key]: !(f as any)[key] }));
@@ -83,33 +94,25 @@ export default function CreateEventPage() {
 
   const handlePublish = (status: 'PUBLISHED' | 'DRAFT') => {
     setError('');
-    if (!form.title || !form.organizerId || !form.venue || !form.startTime || !form.endTime) {
+    if (!form.title || !form.organizerId || (!form.venue && form.attendanceMode !== 'ONLINE') || !form.startTime || !form.endTime) {
       setError('Lengkapi informasi kegiatan terlebih dahulu (Langkah 1)');
       setStep(1); return;
     }
+    
     mutation.mutate({
-      title: form.title, description: form.description,
-      organizerId: form.organizerId, venue: form.venue,
+      ...form,
       startTime: new Date(form.startTime).toISOString(),
       endTime: new Date(form.endTime).toISOString(),
-      category: form.category, bannerUrl: form.bannerUrl || undefined,
-      requiresRegistration: form.requiresRegistration,
-      requiresApproval: form.requiresApproval,
-      isPublic: form.isPublic,
       maxParticipants: form.maxParticipants ? parseInt(form.maxParticipants) : undefined,
-      hasWaitingList: form.hasWaitingList,
-      invitationOnly: form.invitationOnly,
-      multiSession: form.multiSession,
-      requireGps: form.requireGps,
       radiusMeter: Number(form.radiusMeter),
       lateTolerance: Number(form.lateTolerance),
-      timeBoundAttendance: form.timeBoundAttendance,
+      qrRefreshInterval: Number(form.qrRefreshInterval),
       registrationOpenAt: form.registrationOpenAt ? new Date(form.registrationOpenAt).toISOString() : undefined,
       registrationCloseAt: form.registrationCloseAt ? new Date(form.registrationCloseAt).toISOString() : undefined,
       attendanceOpenAt: form.attendanceOpenAt ? new Date(form.attendanceOpenAt).toISOString() : undefined,
       attendanceCloseAt: form.attendanceCloseAt ? new Date(form.attendanceCloseAt).toISOString() : undefined,
-      qrType: form.qrType, dynamicQr: form.dynamicQr,
-      requireSelfie: form.requireSelfie, qrRefreshInterval: Number(form.qrRefreshInterval),
+      latitude: form.latitude ? Number(form.latitude) : undefined,
+      longitude: form.longitude ? Number(form.longitude) : undefined,
       status,
     });
   };
@@ -127,7 +130,7 @@ export default function CreateEventPage() {
 
       {/* Stepper */}
       <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-        <div className="flex items-center gap-1 overflow-x-auto pb-1">
+        <div className="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar">
           {STEPS.map((s, i) => {
             const done = s.id < step;
             const active = s.id === step;
@@ -162,7 +165,7 @@ export default function CreateEventPage() {
             </div>
           </div>
 
-          <div className="p-8 space-y-5">
+          <div className="p-8 space-y-6">
             {/* ── STEP 1 ── */}
             {step === 1 && <>
               <div>
@@ -170,19 +173,20 @@ export default function CreateEventPage() {
                 <input className={inputCls} placeholder="Contoh: Rapat Koordinasi SPBE Triwulan II"
                   value={form.title} onChange={e => set('title', e.target.value)} />
               </div>
-              <div>
-                <label className={labelCls}>Deskripsi Kegiatan</label>
-                <textarea className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all resize-none h-28"
-                  placeholder="Jelaskan tujuan dan agenda kegiatan..."
-                  value={form.description} onChange={e => set('description', e.target.value)} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls}>OPD Penyelenggara <span className="text-red-500">*</span></label>
-                  <select className={inputCls} value={form.organizerId} onChange={e => set('organizerId', e.target.value)}>
+                  <select 
+                    className={`${inputCls} ${isAdminOPD ? 'bg-slate-50 cursor-not-allowed' : ''}`} 
+                    value={form.organizerId} 
+                    onChange={e => !isAdminOPD && set('organizerId', e.target.value)}
+                    disabled={isAdminOPD}
+                  >
                     <option value="">-- Pilih OPD --</option>
                     {opds.map((o: any) => <option key={o.id} value={o.id}>{o.name}</option>)}
                   </select>
+                  {isAdminOPD && <p className="text-[10px] text-blue-600 font-bold mt-1 uppercase tracking-widest">Terkunci ke instansi Anda</p>}
                 </div>
                 <div>
                   <label className={labelCls}>Kategori Kegiatan</label>
@@ -191,11 +195,62 @@ export default function CreateEventPage() {
                   </select>
                 </div>
               </div>
+
               <div>
-                <label className={labelCls}><MapPin className="w-3.5 h-3.5 inline mr-1" />Lokasi / Venue <span className="text-red-500">*</span></label>
-                <input className={inputCls} placeholder="Nama gedung, alamat lengkap"
-                  value={form.venue} onChange={e => set('venue', e.target.value)} />
+                <label className={labelCls}>Tipe Kehadiran</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { v: 'OFFLINE', l: 'Offline', i: MapPin },
+                    { v: 'ONLINE', l: 'Online', i: Globe },
+                    { v: 'HYBRID', l: 'Hybrid', i: Video },
+                  ].map(opt => (
+                    <button key={opt.v} type="button" onClick={() => set('attendanceMode', opt.v)}
+                      className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${form.attendanceMode === opt.v ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-100 hover:border-slate-200 text-slate-500'}`}>
+                      <opt.i className="w-5 h-5 mb-1" />
+                      <span className="text-xs font-bold uppercase tracking-widest">{opt.l}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {(form.attendanceMode === 'OFFLINE' || form.attendanceMode === 'HYBRID') && (
+                <div className="space-y-4 pt-2">
+                  <div className="flex items-center justify-between">
+                    <label className={labelCls}><MapPin className="w-3.5 h-3.5 inline mr-1" />Lokasi / Venue <span className="text-red-500">*</span></label>
+                    <div className="flex bg-slate-100 p-1 rounded-lg">
+                       <button onClick={() => setLocationMode('MANUAL')} className={`px-3 py-1 rounded-md text-[10px] font-black uppercase transition-all ${locationMode === 'MANUAL' ? 'bg-white shadow text-blue-600' : 'text-slate-500'}`}>Manual</button>
+                       <button onClick={() => setLocationMode('MAPS')} className={`px-3 py-1 rounded-md text-[10px] font-black uppercase transition-all ${locationMode === 'MAPS' ? 'bg-white shadow text-blue-600' : 'text-slate-500'}`}>Maps</button>
+                    </div>
+                  </div>
+                  
+                  {locationMode === 'MANUAL' ? (
+                    <input className={inputCls} placeholder="Nama gedung, alamat lengkap"
+                      value={form.venue} onChange={e => set('venue', e.target.value)} />
+                  ) : (
+                    <div className="space-y-3">
+                       <div className="h-40 bg-slate-100 rounded-2xl flex flex-col items-center justify-center border-2 border-dashed border-slate-300 group hover:border-blue-300 transition-all cursor-pointer"
+                        onClick={() => alert('Map Picker Modal — Integration with Google Maps / Leaflet')}>
+                          <MapPin className="w-8 h-8 text-slate-300 group-hover:text-blue-400 mb-2" />
+                          <p className="text-xs font-bold text-slate-400 group-hover:text-blue-500 uppercase tracking-widest">Pilih dari Peta</p>
+                       </div>
+                       <div className="grid grid-cols-2 gap-3">
+                          <input className={inputCls} placeholder="Latitude" value={form.latitude} onChange={e => set('latitude', e.target.value)} />
+                          <input className={inputCls} placeholder="Longitude" value={form.longitude} onChange={e => set('longitude', e.target.value)} />
+                       </div>
+                       <input className={inputCls} placeholder="Label Lokasi (Contoh: Kantor Bupati)" value={form.venue} onChange={e => set('venue', e.target.value)} />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {(form.attendanceMode === 'ONLINE' || form.attendanceMode === 'HYBRID') && (
+                <div>
+                  <label className={labelCls}><Globe className="w-3.5 h-3.5 inline mr-1" />Tautan Meeting (Zoom/YT/Lainnya) <span className="text-red-500">*</span></label>
+                  <input className={inputCls} placeholder="https://zoom.us/j/..."
+                    value={form.onlineUrl} onChange={e => set('onlineUrl', e.target.value)} />
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls}><Calendar className="w-3.5 h-3.5 inline mr-1" />Waktu Mulai <span className="text-red-500">*</span></label>
@@ -207,10 +262,6 @@ export default function CreateEventPage() {
                   <input type="datetime-local" className={inputCls}
                     value={form.endTime} onChange={e => set('endTime', e.target.value)} />
                 </div>
-              </div>
-              <div>
-                <label className={labelCls}>URL Banner Kegiatan</label>
-                <input className={inputCls} placeholder="https://..." value={form.bannerUrl} onChange={e => set('bannerUrl', e.target.value)} />
               </div>
             </>}
 
@@ -233,46 +284,34 @@ export default function CreateEventPage() {
                 <input type="number" className={inputCls} placeholder="Kosongkan jika tidak dibatasi"
                   value={form.maxParticipants} onChange={e => set('maxParticipants', e.target.value)} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={labelCls}>Registrasi Dibuka</label>
-                  <input type="datetime-local" className={inputCls} value={form.registrationOpenAt} onChange={e => set('registrationOpenAt', e.target.value)} />
-                </div>
-                <div>
-                  <label className={labelCls}>Registrasi Ditutup</label>
-                  <input type="datetime-local" className={inputCls} value={form.registrationCloseAt} onChange={e => set('registrationCloseAt', e.target.value)} />
-                </div>
-              </div>
             </>}
 
             {/* ── STEP 3 ── */}
             {step === 3 && <>
               <div className="divide-y divide-slate-100">
-                <FieldRow label="Validasi GPS" desc="Peserta harus berada di sekitar lokasi kegiatan" enabled={form.requireGps} onToggle={() => tog('requireGps')} />
+                <FieldRow label="Validasi GPS" desc="Peserta harus berada di sekitar lokasi kegiatan (Hanya Offline/Hybrid)" enabled={form.requireGps && form.attendanceMode !== 'ONLINE'} onToggle={() => form.attendanceMode !== 'ONLINE' && tog('requireGps')} />
                 <FieldRow label="Kehadiran Berbasis Waktu" desc="QR hanya aktif di jam kehadiran yang ditentukan" enabled={form.timeBoundAttendance} onToggle={() => tog('timeBoundAttendance')} />
               </div>
+              
+              {form.attendanceMode === 'ONLINE' && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-[10px] font-bold text-amber-700 uppercase tracking-widest flex gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  Validasi GPS dinonaktifkan otomatis untuk kegiatan Full Online.
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls}>Radius GPS (meter)</label>
-                  <input type="number" className={inputCls} value={form.radiusMeter} onChange={e => set('radiusMeter', e.target.value)} />
+                  <input type="number" className={`${inputCls} ${form.attendanceMode === 'ONLINE' ? 'bg-slate-50 cursor-not-allowed' : ''}`} 
+                    disabled={form.attendanceMode === 'ONLINE'}
+                    value={form.radiusMeter} onChange={e => set('radiusMeter', e.target.value)} />
                 </div>
                 <div>
                   <label className={labelCls}>Toleransi Keterlambatan (menit)</label>
                   <input type="number" className={inputCls} value={form.lateTolerance} onChange={e => set('lateTolerance', e.target.value)} />
                 </div>
               </div>
-              {form.timeBoundAttendance && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className={labelCls}>Kehadiran Dibuka</label>
-                    <input type="datetime-local" className={inputCls} value={form.attendanceOpenAt} onChange={e => set('attendanceOpenAt', e.target.value)} />
-                  </div>
-                  <div>
-                    <label className={labelCls}>Kehadiran Ditutup</label>
-                    <input type="datetime-local" className={inputCls} value={form.attendanceCloseAt} onChange={e => set('attendanceCloseAt', e.target.value)} />
-                  </div>
-                </div>
-              )}
             </>}
 
             {/* ── STEP 4 ── */}
@@ -304,25 +343,27 @@ export default function CreateEventPage() {
 
             {/* ── STEP 5 ── */}
             {step === 5 && <>
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-700 flex gap-2">
-                <Bell className="w-4 h-4 shrink-0 mt-0.5" />
-                Pilih saluran notifikasi yang akan diaktifkan untuk kegiatan ini.
-              </div>
-              <div className="divide-y divide-slate-100">
-                <FieldRow label="Notifikasi Email" desc="Kirim email otomatis ke peserta" enabled={form.notifyEmail} onToggle={() => tog('notifyEmail')} />
-                <FieldRow label="Notifikasi WhatsApp" desc="Kirim WA via WhatsApp Business API" enabled={form.notifyWa} onToggle={() => tog('notifyWa')} />
-                <FieldRow label="Notifikasi In-App" desc="Notifikasi di dalam aplikasi SIHADIR" enabled={form.notifyApp} onToggle={() => tog('notifyApp')} />
-              </div>
-              <div className="bg-slate-50 rounded-xl p-4 space-y-2">
-                <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Template Notifikasi Aktif</p>
-                {[
-                  'Registrasi Berhasil', 'Persetujuan Peserta', 'Pengingat Kegiatan (H-1)',
-                  'QR Kehadiran Dibuka', 'Kehadiran Tercatat', 'Sertifikat Tersedia',
-                ].map(t => (
-                  <div key={t} className="flex items-center gap-2 text-sm text-slate-600">
-                    <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> {t}
+              <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-600 rounded-lg"><Bell className="w-4 h-4 text-white" /></div>
+                  <h3 className="font-black text-white text-sm uppercase tracking-widest">Saluran Notifikasi</h3>
+                </div>
+                <div className="divide-y divide-white/5">
+                  <div className="flex items-center justify-between py-3">
+                    <div>
+                      <p className="text-xs font-bold text-white">Notifikasi Email</p>
+                      <p className="text-[10px] text-slate-500">Kirim email otomatis ke peserta</p>
+                    </div>
+                    <Toggle enabled={form.notifyEmail} onToggle={() => tog('notifyEmail')} />
                   </div>
-                ))}
+                  <div className="flex items-center justify-between py-3">
+                    <div>
+                      <p className="text-xs font-bold text-white">Notifikasi WhatsApp</p>
+                      <p className="text-[10px] text-slate-500">Kirim WA via WhatsApp Business API</p>
+                    </div>
+                    <Toggle enabled={form.notifyWa} onToggle={() => tog('notifyWa')} />
+                  </div>
+                </div>
               </div>
             </>}
 
@@ -334,13 +375,11 @@ export default function CreateEventPage() {
                   {[
                     { l: 'Judul', v: form.title || '—' },
                     { l: 'Penyelenggara', v: opds.find((o:any) => o.id === form.organizerId)?.name || '—' },
-                    { l: 'Lokasi', v: form.venue || '—' },
+                    { l: 'Mode', v: form.attendanceMode },
+                    { l: 'Lokasi/Link', v: form.attendanceMode === 'ONLINE' ? form.onlineUrl : form.venue || '—' },
+                    { l: 'Validasi GPS', v: (form.requireGps && form.attendanceMode !== 'ONLINE') ? `Ya (${form.radiusMeter}m)` : 'Tidak' },
                     { l: 'Mulai', v: form.startTime ? new Date(form.startTime).toLocaleString('id-ID') : '—' },
                     { l: 'Selesai', v: form.endTime ? new Date(form.endTime).toLocaleString('id-ID') : '—' },
-                    { l: 'Registrasi', v: form.requiresRegistration ? (form.requiresApproval ? 'Diperlukan + Persetujuan' : 'Diperlukan (Auto-approve)') : 'Tidak diperlukan' },
-                    { l: 'QR Code', v: form.dynamicQr ? `Dinamis (refresh ${form.qrRefreshInterval}s)` : 'Statis' },
-                    { l: 'Validasi GPS', v: form.requireGps ? `Ya (radius ${form.radiusMeter}m)` : 'Tidak' },
-                    { l: 'Kuota', v: form.maxParticipants ? `${form.maxParticipants} peserta` : 'Tidak dibatasi' },
                   ].map(r => (
                     <div key={r.l} className="flex items-start justify-between gap-4 text-sm py-1 border-b border-slate-100 last:border-0">
                       <span className="text-slate-500 font-medium">{r.l}</span>

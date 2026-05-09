@@ -16,6 +16,8 @@ import StorageModule from './modules/StorageModule';
 import FeatureFlagsModule from './modules/FeatureFlagsModule';
 import ComplianceModule from './modules/ComplianceModule';
 import SmtpModule from './modules/SmtpModule';
+import OpdManagementModule from './modules/OpdManagementModule';
+import ComingSoonModal from '@/components/modals/ComingSoonModal';
 
 /* ─── Nav Modules ─── */
 const MODULES = [
@@ -27,14 +29,20 @@ const MODULES = [
   },
   {
     id: 'security', label: 'Security Center', icon: Shield,
-    badge: '2', badgeColor: 'red',
+    badge: 'SECURE', badgeColor: 'emerald',
     desc: 'Threats, SSL, Audit',
     group: 'Platform Core',
   },
   {
     id: 'identity', label: 'Identity & SSO', icon: Users,
-    badge: null, badgeColor: 'blue',
+    badge: '1 TENANT', badgeColor: 'blue',
     desc: 'Tenants, Roles, SSO',
+    group: 'Platform Core',
+  },
+  {
+    id: 'opd', label: 'OPD Management', icon: Building2,
+    badge: null, badgeColor: 'blue',
+    desc: 'Kelola Organisasi Perangkat Daerah',
     group: 'Platform Core',
   },
   {
@@ -51,7 +59,7 @@ const MODULES = [
   },
   {
     id: 'storage', label: 'Storage & Queue', icon: HardDrive,
-    badge: '14', badgeColor: 'amber',
+    badge: null, badgeColor: 'amber',
     desc: 'MinIO, Backup, Bull',
     group: 'Operations',
   },
@@ -63,7 +71,7 @@ const MODULES = [
   },
   {
     id: 'compliance', label: 'Compliance', icon: Award,
-    badge: '3', badgeColor: 'amber',
+    badge: null, badgeColor: 'amber',
     desc: 'SPBE, Regulasi, Maintenance',
     group: 'Operations',
   },
@@ -87,19 +95,24 @@ const GLOW_COLORS: Record<string, string> = {
 
 /* ─── Live Ticker Messages ─── */
 const TICKER = [
-  '🟢 All 6 core services operational',
-  '🔴 2 threats blocked in the last 24h',
-  '📊 SPBE Score: 77.4% — Kabupaten Minahasa Selatan',
-  '💾 Last backup: 09 May 2026 02:00 WITA — VERIFIED',
-  '⚡ API P95 latency: 28ms — within SLA',
-  '👤 38 active admin sessions across the platform',
-  '🔐 SSL renewal due in 14 days for minio.sihadir.minsel.go.id',
+  '🟢 Platform SIHADIR Minsel operational',
+  '🛡️ Security center active — No threats detected',
+  '📊 SPBE Score: 85.0% — Kabupaten Minahasa Selatan',
+  '💾 Scheduled backup active (02:00 WITA)',
+  '⚡ API Status: Healthy — within SLA',
+  '👤 System initialized for production deployment',
+  '🔐 SSL Certificate for sihadir.minsel.go.id is VALID',
 ];
 
 export default function SuperAdminConsolePage() {
   const [active, setActive] = useState('infrastructure');
   const [time, setTime] = useState(new Date());
   const [tickerIdx, setTickerIdx] = useState(0);
+  const [comingSoon, setComingSoon] = useState({ isOpen: false, name: '' });
+
+  const handleAction = (name: string) => {
+    setComingSoon({ isOpen: true, name });
+  };
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
@@ -127,6 +140,11 @@ export default function SuperAdminConsolePage() {
       </div>
 
       <div className="relative z-10 flex flex-col h-screen">
+        <ComingSoonModal 
+          isOpen={comingSoon.isOpen} 
+          onClose={() => setComingSoon({ ...comingSoon, isOpen: false })} 
+          featureName={comingSoon.name} 
+        />
 
         {/* ── HEADER ── */}
         <header className="shrink-0 border-b border-white/[0.06] bg-[#050a18]/80 backdrop-blur-2xl">
@@ -244,16 +262,16 @@ export default function SuperAdminConsolePage() {
             <div className="border-t border-white/[0.06] pt-4">
               <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.25em] px-3 mb-2">Quick Links</p>
               {[
-                { label: 'Users Management', href: '/super-admin/users', icon: Users },
-                { label: 'Audit Trail', href: '/audit-logs', icon: Layers },
-                { label: 'Command Center', href: '/command-center', icon: Globe },
+                { label: 'Users Management', icon: Users },
+                { label: 'Audit Trail', icon: Layers },
+                { label: 'Command Center', icon: Globe },
               ].map(link => (
-                <a key={link.label} href={link.href}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 text-slate-500 hover:text-slate-300 transition-all group">
+                <button key={link.label} onClick={() => handleAction(link.label)}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 text-slate-500 hover:text-slate-300 transition-all group text-left">
                   <link.icon className="w-4 h-4 shrink-0" />
                   <span className="text-xs font-bold">{link.label}</span>
                   <ChevronRight className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                </a>
+                </button>
               ))}
             </div>
           </nav>
@@ -294,14 +312,15 @@ export default function SuperAdminConsolePage() {
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.3, ease: 'easeOut' }}
                 >
-                  {active === 'infrastructure' && <InfrastructureModule />}
-                  {active === 'security' && <SecurityModule />}
-                  {active === 'identity' && <IdentityModule />}
-                  {active === 'api' && <ApiModule />}
-                  {active === 'smtp' && <SmtpModule />}
-                  {active === 'storage' && <StorageModule />}
-                  {active === 'flags' && <FeatureFlagsModule />}
-                  {active === 'compliance' && <ComplianceModule />}
+                  {active === 'infrastructure' && <InfrastructureModule onAction={handleAction} />}
+                  {active === 'security' && <SecurityModule onAction={handleAction} />}
+                  {active === 'identity' && <IdentityModule onAction={handleAction} />}
+                  {active === 'api' && <ApiModule onAction={handleAction} />}
+                  {active === 'smtp' && <SmtpModule onAction={handleAction} />}
+                  {active === 'storage' && <StorageModule onAction={handleAction} />}
+                  {active === 'flags' && <FeatureFlagsModule onAction={handleAction} />}
+                  {active === 'compliance' && <ComplianceModule onAction={handleAction} />}
+                  {active === 'opd' && <OpdManagementModule onAction={handleAction} />}
                 </motion.div>
               </AnimatePresence>
             </div>

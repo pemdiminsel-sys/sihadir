@@ -15,7 +15,7 @@ const TEMPLATES = [
   { id: 'sertifikat_selesai', label: 'Sertifikat Tersedia', icon: '🏆' },
 ];
 
-export default function SmtpModule() {
+export default function SmtpModule({ onAction }: { onAction: (name: string) => void }) {
   const qc = useQueryClient();
   const [tab, setTab] = useState<'config' | 'logs' | 'templates'>('config');
   const [showPass, setShowPass] = useState(false);
@@ -69,7 +69,9 @@ export default function SmtpModule() {
           { label: 'Email Gagal (24j)', value: logs.filter((l: any) => l.status === 'FAILED').length || 0, icon: AlertTriangle, color: '#ef4444' },
         ].map((kpi, i) => (
           <motion.div key={kpi.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
-            className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-3 hover:bg-white/[0.08] transition-all">
+            className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-3 hover:bg-white/[0.08] transition-all cursor-pointer"
+            onClick={() => onAction(`Detail SMTP: ${kpi.label}`)}
+          >
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${kpi.color}20`, border: `1px solid ${kpi.color}40` }}>
               <kpi.icon className="w-4 h-4" style={{ color: kpi.color }} />
             </div>
@@ -153,9 +155,9 @@ export default function SmtpModule() {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}
+              <button onClick={() => onAction('Simpan Konfigurasi SMTP')}
                 className="flex-1 h-11 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-sm transition-all shadow-lg shadow-blue-600/30 disabled:opacity-60 flex items-center justify-center gap-2">
-                {saveMut.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Menyimpan…</> : <><CheckCircle2 className="w-4 h-4" />Simpan Konfigurasi</>}
+                <CheckCircle2 className="w-4 h-4" />Simpan Konfigurasi
               </button>
             </div>
           </div>
@@ -166,9 +168,9 @@ export default function SmtpModule() {
             <div className="flex gap-3">
               <input className={inputCls} type="email" placeholder="Masukkan email tujuan uji coba..."
                 value={testEmail} onChange={e => setTestEmail(e.target.value)} />
-              <button onClick={() => { setTestResult(null); testMut.mutate(); }} disabled={testMut.isPending || !testEmail}
+              <button onClick={() => onAction('Kirim Test Email')} disabled={!testEmail}
                 className="px-5 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm transition-all shadow-lg shadow-emerald-600/30 disabled:opacity-50 flex items-center gap-2 shrink-0">
-                {testMut.isPending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                <Send className="w-4 h-4" />
                 Kirim Test
               </button>
             </div>
@@ -196,7 +198,7 @@ export default function SmtpModule() {
           ) : (
             <div className="divide-y divide-white/5">
               {logs.map((log: any) => (
-                <div key={log.id} className="px-6 py-3 grid grid-cols-12 gap-4 items-center hover:bg-white/5 transition-colors">
+                <div key={log.id} className="px-6 py-3 grid grid-cols-12 gap-4 items-center hover:bg-white/5 transition-colors cursor-pointer" onClick={() => onAction('Detail Log SMTP')}>
                   <span className="col-span-3 text-xs font-mono text-slate-400">{log.type}</span>
                   <span className="col-span-5 text-xs text-slate-300 truncate">{JSON.stringify(log.payload).substring(0, 40)}…</span>
                   <span className="col-span-2 text-center text-xs text-slate-400">{log.attempts}</span>
@@ -215,6 +217,7 @@ export default function SmtpModule() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {TEMPLATES.map((t, i) => (
             <motion.div key={t.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
+              onClick={() => onAction(`Edit Template: ${t.label}`)}
               className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:border-white/20 cursor-pointer transition-all group">
               <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-lg shrink-0">
                 {t.icon}

@@ -28,13 +28,13 @@ const METHOD_COLORS: Record<string, string> = {
 };
 
 const INTEGRATIONS = [
-  { name: 'SIASN BKN API', desc: 'ASN data sync & NIP validation', status: 'HEALTHY', calls24h: 1240, lastSync: '2m ago' },
-  { name: 'WhatsApp Business API', desc: 'Notification delivery engine', status: 'HEALTHY', calls24h: 3840, lastSync: '1m ago' },
-  { name: 'MinIO S3 Gateway', desc: 'Document & certificate storage', status: 'HEALTHY', calls24h: 842, lastSync: '5s ago' },
-  { name: 'SPBE Dashboard Gov', desc: 'Compliance reporting endpoint', status: 'DEGRADED', calls24h: 12, lastSync: '2h ago' },
+  { name: 'SIASN BKN API', desc: 'ASN data sync & NIP validation', status: 'DISCONNECTED', calls24h: 0, lastSync: '—' },
+  { name: 'WhatsApp Business API', desc: 'Notification delivery engine', status: 'HEALTHY', calls24h: 0, lastSync: '—' },
+  { name: 'MinIO S3 Gateway', desc: 'Document & certificate storage', status: 'HEALTHY', calls24h: 0, lastSync: '—' },
+  { name: 'SPBE Dashboard Gov', desc: 'Compliance reporting endpoint', status: 'DISCONNECTED', calls24h: 0, lastSync: '—' },
 ];
 
-export default function ApiModule() {
+export default function ApiModule({ onAction }: { onAction: (name: string) => void }) {
   const [tab, setTab] = useState<'endpoints' | 'integrations' | 'traffic'>('endpoints');
 
   return (
@@ -42,10 +42,10 @@ export default function ApiModule() {
       {/* KPI strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Requests (24h)', value: '36.5K', icon: Zap, color: '#3b82f6' },
-          { label: 'Avg Latency', value: '28ms', icon: Activity, color: '#10b981' },
-          { label: 'Error Rate', value: '0.07%', icon: AlertTriangle, color: '#f59e0b' },
-          { label: 'Uptime SLA', value: '99.97%', icon: CheckCircle2, color: '#8b5cf6' },
+          { label: 'Total Requests (24h)', value: '0', icon: Zap, color: '#3b82f6' },
+          { label: 'Avg Latency', value: '0ms', icon: Activity, color: '#10b981' },
+          { label: 'Error Rate', value: '0.00%', icon: AlertTriangle, color: '#f59e0b' },
+          { label: 'Uptime SLA', value: '100.00%', icon: CheckCircle2, color: '#8b5cf6' },
         ].map((kpi, i) => (
           <motion.div key={kpi.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
             className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:bg-white/[0.08] transition-all">
@@ -108,7 +108,9 @@ export default function ApiModule() {
         <div className="space-y-3">
           {INTEGRATIONS.map((int, i) => (
             <motion.div key={int.name} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }}
-              className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:border-white/20 transition-all">
+              className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:border-white/20 transition-all cursor-pointer"
+              onClick={() => onAction(`Integrasi ${int.name}`)}
+            >
               <div className={`w-3 h-12 rounded-full shrink-0 ${int.status === 'HEALTHY' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-black text-white">{int.name}</p>

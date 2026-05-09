@@ -15,10 +15,10 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 const kpis = [
-  { label: 'Kehadiran Hari Ini', value: '4,281', trend: '+12%', icon: Users, color: 'bg-blue-500' },
-  { label: 'Kegiatan Aktif', value: '24', trend: 'Stabil', icon: Calendar, color: 'bg-emerald-500' },
-  { label: 'Indeks SPBE', value: '3.8', trend: '+0.2', icon: Zap, color: 'bg-amber-500' },
-  { label: 'Sertifikat Terbit', value: '1.2k', trend: '+85', icon: Award, color: 'bg-violet-500' },
+  { label: 'Kehadiran Hari Ini', value: '0', trend: '0%', icon: Users, color: 'bg-blue-500' },
+  { label: 'Kegiatan Aktif', value: '0', trend: 'Initial', icon: Calendar, color: 'bg-emerald-500' },
+  { label: 'Indeks SPBE', value: '0.0', trend: 'Initial', icon: Zap, color: 'bg-amber-500' },
+  { label: 'Sertifikat Terbit', value: '0', trend: '0', icon: Award, color: 'bg-violet-500' },
 ];
 
 export default function MobileExecutiveDashboard() {
@@ -46,7 +46,7 @@ export default function MobileExecutiveDashboard() {
                </div>
                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{kpi.label}</p>
                <h3 className="text-3xl font-black text-slate-900 mt-1">{kpi.value}</h3>
-               <div className="mt-4 flex items-center gap-1 text-[10px] font-bold text-emerald-500">
+               <div className="mt-4 flex items-center gap-1 text-[10px] font-bold text-slate-400">
                   <TrendingUp className="h-3 w-3" /> {kpi.trend} vs Sesi Lalu
                </div>
             </Card>
@@ -58,26 +58,16 @@ export default function MobileExecutiveDashboard() {
       <div className="px-6 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-slate-900">Kegiatan Utama</h3>
-          <button className="text-xs font-bold text-blue-600">LIHAT SEMUA</button>
+          <button className="text-xs font-bold text-slate-300 cursor-not-allowed">LIHAT SEMUA</button>
         </div>
         
-        {[1, 2, 3].map(i => (
-          <Card key={i} className="p-4 border-none shadow-sm shadow-slate-100 rounded-3xl bg-white flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 shrink-0 border border-slate-100">
-               <Activity className="h-6 w-6" />
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <p className="text-sm font-bold text-slate-900 truncate">Rapat Koordinasi Strategis {i}</p>
-              <div className="flex items-center gap-3 mt-1">
-                <span className="text-[10px] text-slate-500 flex items-center gap-1">
-                  <MapPin className="h-3 w-3" /> Aula Bupati
-                </span>
-                <Badge className="bg-blue-50 text-blue-600 border-none text-[8px] h-4 rounded-md">142 HADIR</Badge>
-              </div>
-            </div>
-            <ChevronRight className="h-5 w-5 text-slate-300" />
-          </Card>
-        ))}
+        <Card className="p-8 border-none shadow-sm shadow-slate-100 rounded-[2rem] bg-white flex flex-col items-center justify-center text-center">
+          <div className="w-16 h-16 rounded-3xl bg-slate-50 flex items-center justify-center text-slate-200 mb-4 border border-slate-100">
+             <Activity className="h-8 w-8" />
+          </div>
+          <p className="text-sm font-black text-slate-400 uppercase tracking-widest">Belum ada kegiatan aktif</p>
+          <p className="text-[10px] text-slate-400 mt-1">Kegiatan yang sedang berjalan akan muncul di sini.</p>
+        </Card>
       </div>
 
       {/* Quick Action Floating Menu (Optional implementation for dashboard) */}

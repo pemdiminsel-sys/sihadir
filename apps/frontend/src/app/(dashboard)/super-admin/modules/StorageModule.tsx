@@ -6,33 +6,27 @@ import { HardDrive, Archive, Clock, CheckCircle2, AlertTriangle, RefreshCw, Down
 
 /* ─── Storage ─── */
 const BUCKETS = [
-  { name: 'sihadir-documents', type: 'Sertifikat & Dokumen', size: '14.8 GB', objects: 8_420, access: 'PRIVATE' },
-  { name: 'sihadir-photos', type: 'Foto Peserta & KTP', size: '6.2 GB', objects: 3_214, access: 'PRIVATE' },
-  { name: 'sihadir-qr-codes', type: 'QR Code Cache', size: '0.8 GB', objects: 12_840, access: 'PUBLIC-READ' },
-  { name: 'sihadir-exports', type: 'Laporan & Ekspor', size: '2.1 GB', objects: 642, access: 'PRIVATE' },
+  { name: 'sihadir-documents', type: 'Sertifikat & Dokumen', size: '0 GB', objects: 0, access: 'PRIVATE' },
+  { name: 'sihadir-photos', type: 'Foto Peserta & KTP', size: '0 GB', objects: 0, access: 'PRIVATE' },
+  { name: 'sihadir-qr-codes', type: 'QR Code Cache', size: '0 GB', objects: 0, access: 'PUBLIC-READ' },
+  { name: 'sihadir-exports', type: 'Laporan & Ekspor', size: '0 GB', objects: 0, access: 'PRIVATE' },
 ];
-const TOTAL_USED = 23.9;
+const TOTAL_USED = 0.0;
 const TOTAL_CAP = 100;
 
 /* ─── Backup ─── */
-const BACKUPS = [
-  { id: 'BK-20260509-0200', label: 'Daily Backup', created: '09 May 2026 02:00', size: '2.8 GB', status: 'VERIFIED', type: 'FULL' },
-  { id: 'BK-20260508-0200', label: 'Daily Backup', created: '08 May 2026 02:00', size: '2.7 GB', status: 'VERIFIED', type: 'FULL' },
-  { id: 'BK-20260507-0200', label: 'Daily Backup', created: '07 May 2026 02:00', size: '2.6 GB', status: 'VERIFIED', type: 'FULL' },
-  { id: 'BK-20260506-0200', label: 'Daily Backup', created: '06 May 2026 02:00', size: '2.4 GB', status: 'VERIFIED', type: 'FULL' },
-  { id: 'BK-20260505-0200', label: 'Daily Backup', created: '05 May 2026 02:00', size: '2.3 GB', status: 'CORRUPTED', type: 'FULL' },
-];
+const BACKUPS: any[] = [];
 
 /* ─── Queue ─── */
 const QUEUES = [
-  { name: 'notification:whatsapp', pending: 0, completed: 3840, failed: 2, workers: 3, rate: '42/min' },
-  { name: 'notification:email', pending: 0, completed: 1240, failed: 0, workers: 2, rate: '18/min' },
-  { name: 'attendance:sync', pending: 14, completed: 8420, failed: 0, workers: 1, rate: '8/min' },
-  { name: 'export:pdf', pending: 2, completed: 642, failed: 1, workers: 2, rate: '4/min' },
-  { name: 'backup:database', pending: 0, completed: 5, failed: 1, workers: 1, rate: 'Scheduled' },
+  { name: 'notification:whatsapp', pending: 0, completed: 0, failed: 0, workers: 3, rate: '0/min' },
+  { name: 'notification:email', pending: 0, completed: 0, failed: 0, workers: 2, rate: '0/min' },
+  { name: 'attendance:sync', pending: 0, completed: 0, failed: 0, workers: 1, rate: '0/min' },
+  { name: 'export:pdf', pending: 0, completed: 0, failed: 0, workers: 2, rate: '0/min' },
+  { name: 'backup:database', pending: 0, completed: 0, failed: 0, workers: 1, rate: 'Scheduled' },
 ];
 
-export default function StorageModule() {
+export default function StorageModule({ onAction }: { onAction: (name: string) => void }) {
   const [tab, setTab] = useState<'storage' | 'backup' | 'queue'>('storage');
   const [restoring, setRestoring] = useState<string | null>(null);
 
@@ -52,7 +46,9 @@ export default function StorageModule() {
           { label: 'Queue Failed', value: QUEUES.reduce((s,q)=>s+q.failed,0), sub: 'last 24h', icon: AlertTriangle, color: '#ef4444' },
         ].map((kpi, i) => (
           <motion.div key={kpi.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
-            className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:bg-white/[0.08] transition-all">
+            className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:bg-white/[0.08] transition-all cursor-pointer"
+            onClick={() => onAction(`Detail Storage: ${kpi.label}`)}
+          >
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${kpi.color}20`, border: `1px solid ${kpi.color}40` }}>
               <kpi.icon className="w-5 h-5" style={{ color: kpi.color }} />
             </div>
@@ -97,7 +93,9 @@ export default function StorageModule() {
           {/* Buckets */}
           {BUCKETS.map((b, i) => (
             <motion.div key={b.name} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.07 }}
-              className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:border-white/20 transition-all">
+              className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:border-white/20 transition-all cursor-pointer"
+              onClick={() => onAction(`Bucket ${b.name}`)}
+            >
               <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
                 <HardDrive className="w-5 h-5 text-blue-400" />
               </div>
@@ -117,11 +115,20 @@ export default function StorageModule() {
       {tab === 'backup' && (
         <div className="space-y-3">
           <div className="flex justify-end gap-2">
-            <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-600/30">
+            <button 
+              onClick={() => onAction('Run Backup Now')}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-600/30"
+            >
               <Archive className="w-3.5 h-3.5" /> Run Backup Now
             </button>
           </div>
-          {BACKUPS.map((bk, i) => (
+          {BACKUPS.length === 0 ? (
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-12 text-center">
+              <Archive className="w-12 h-12 text-slate-700 mx-auto mb-4" />
+              <p className="text-sm font-black text-slate-400 uppercase tracking-widest">Belum ada backup tersedia</p>
+              <p className="text-[10px] text-slate-600 mt-1">Backup otomatis dijadwalkan setiap hari pukul 02:00 WITA</p>
+            </div>
+          ) : BACKUPS.map((bk, i) => (
             <motion.div key={bk.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.06 }}
               className={`bg-white/5 border rounded-2xl p-5 flex items-center gap-4 transition-all ${bk.status === 'CORRUPTED' ? 'border-red-500/20' : 'border-white/10 hover:border-white/20'}`}>
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${bk.status === 'VERIFIED' ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
@@ -138,9 +145,9 @@ export default function StorageModule() {
                 <p className="text-sm font-black text-white">{bk.size}</p>
               </div>
               {bk.status === 'VERIFIED' ? (
-                <button onClick={() => startRestore(bk.id)}
+                <button onClick={() => onAction('Restore Backup')}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 text-blue-400 text-[9px] font-black uppercase tracking-widest transition-all shrink-0">
-                  {restoring === bk.id ? <><RefreshCw className="w-3 h-3 animate-spin" />Restoring…</> : <><Download className="w-3 h-3" />Restore</>}
+                  <Download className="w-3 h-3" />Restore
                 </button>
               ) : (
                 <span className="text-[9px] font-black px-3 py-1.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center gap-1.5 shrink-0">
@@ -148,6 +155,9 @@ export default function StorageModule() {
                 </span>
               )}
             </motion.div>
+          ))}
+        </div>
+      )}motion.div>
           ))}
         </div>
       )}

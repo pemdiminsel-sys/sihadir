@@ -83,7 +83,8 @@ model Event {
   radiusMeter    Int    @default(100)
   startTime      DateTime
   endTime        DateTime
-  attendanceMode String   @default("QR")
+  attendanceMode String   @default("OFFLINE")
+  onlineUrl      String?
   qrType         String   @default("DYNAMIC")
   requireSelfie  Boolean  @default(false)
   requireGps     Boolean  @default(true)

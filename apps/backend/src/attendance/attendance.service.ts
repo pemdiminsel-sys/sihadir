@@ -48,7 +48,7 @@ export class AttendanceService {
     }
 
     // 2. GPS Validation
-    if (event.requireGps && event.latitude && event.longitude) {
+    if (event.attendanceMode !== 'ONLINE' && event.requireGps && event.latitude && event.longitude) {
       if (dto.latitude === undefined || dto.longitude === undefined) {
         throw new BadRequestException('Data lokasi GPS diperlukan');
       }

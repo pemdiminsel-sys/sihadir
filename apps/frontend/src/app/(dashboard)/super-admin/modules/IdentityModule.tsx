@@ -5,22 +5,19 @@ import { motion } from 'framer-motion';
 import { Users, Building2, ShieldCheck, Key, UserPlus, ToggleLeft, ToggleRight, Globe } from 'lucide-react';
 
 const TENANTS = [
-  { id: 'T-001', name: 'Pemkab Minahasa Selatan', slug: 'minsel', users: 842, plan: 'ENTERPRISE', status: 'ACTIVE', region: 'Sulawesi Utara' },
-  { id: 'T-002', name: 'Dinas Kominfo Minsel', slug: 'kominfo-minsel', users: 48, plan: 'PROFESSIONAL', status: 'ACTIVE', region: 'Sulawesi Utara' },
-  { id: 'T-003', name: 'BKPSDM Minsel', slug: 'bkpsdm-minsel', users: 124, plan: 'PROFESSIONAL', status: 'ACTIVE', region: 'Sulawesi Utara' },
-  { id: 'T-004', name: 'Dinas Kesehatan Minsel', slug: 'dinkes-minsel', users: 210, plan: 'STANDARD', status: 'SUSPENDED', region: 'Sulawesi Utara' },
+  { id: 'T-001', name: 'Pemkab Minahasa Selatan', slug: 'minsel', users: 1, plan: 'ENTERPRISE', status: 'ACTIVE', region: 'Sulawesi Utara' },
 ];
 
 const ROLES = [
-  { name: 'SUPER_ADMIN', desc: 'Full system access — unrestricted', users: 2, color: '#ef4444' },
-  { name: 'ADMIN_OPD', desc: 'OPD-scoped admin with event management', users: 18, color: '#f59e0b' },
-  { name: 'OPERATOR', desc: 'Event creation & attendance oversight', users: 94, color: '#3b82f6' },
-  { name: 'PESERTA', desc: 'Attendance submission only', users: 728, color: '#10b981' },
+  { name: 'SUPER_ADMIN', desc: 'Full system access — unrestricted', users: 1, color: '#ef4444' },
+  { name: 'ADMIN_OPD', desc: 'OPD-scoped admin with event management', users: 0, color: '#f59e0b' },
+  { name: 'PANITIA', desc: 'Event creation & attendance oversight', users: 0, color: '#3b82f6' },
+  { name: 'PESERTA', desc: 'Attendance submission only', users: 0, color: '#10b981' },
 ];
 
 const SSO_PROVIDERS = [
-  { name: 'SIASN BKN Integration', type: 'OAuth 2.0', status: 'CONNECTED', icon: '🏛' },
-  { name: 'Google Workspace', type: 'OIDC', status: 'CONNECTED', icon: '🟡' },
+  { name: 'SIASN BKN Integration', type: 'OAuth 2.0', status: 'DISCONNECTED', icon: '🏛' },
+  { name: 'Google Workspace', type: 'OIDC', status: 'DISCONNECTED', icon: '🟡' },
   { name: 'LDAP / Active Directory', type: 'LDAP v3', status: 'DISABLED', icon: '🔷' },
 ];
 
@@ -30,7 +27,7 @@ const PLAN_COLORS: Record<string, string> = {
   STANDARD: 'bg-slate-500/10 border-slate-500/30 text-slate-400',
 };
 
-export default function IdentityModule() {
+export default function IdentityModule({ onAction }: { onAction: (name: string) => void }) {
   const [tab, setTab] = useState<'tenants' | 'roles' | 'sso'>('tenants');
 
   return (
@@ -38,13 +35,15 @@ export default function IdentityModule() {
       {/* KPI strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Users', value: '842', icon: Users, color: '#3b82f6' },
-          { label: 'Active Tenants', value: '3', icon: Building2, color: '#10b981' },
-          { label: 'Active Sessions', value: '38', icon: Globe, color: '#8b5cf6' },
-          { label: 'MFA Adoption', value: '87%', icon: ShieldCheck, color: '#f59e0b' },
+          { label: 'Total Users', value: '1', icon: Users, color: '#3b82f6' },
+          { label: 'Active Tenants', value: '1', icon: Building2, color: '#10b981' },
+          { label: 'Active Sessions', value: '1', icon: Globe, color: '#8b5cf6' },
+          { label: 'MFA Adoption', value: '0%', icon: ShieldCheck, color: '#f59e0b' },
         ].map((kpi, i) => (
           <motion.div key={kpi.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
-            className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:bg-white/[0.08] transition-all">
+            className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:bg-white/[0.08] transition-all cursor-pointer"
+            onClick={() => onAction(`Detail Identity: ${kpi.label}`)}
+          >
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${kpi.color}20`, border: `1px solid ${kpi.color}40` }}>
               <kpi.icon className="w-5 h-5" style={{ color: kpi.color }} />
             </div>
@@ -69,13 +68,18 @@ export default function IdentityModule() {
       {tab === 'tenants' && (
         <div className="space-y-3">
           <div className="flex justify-end">
-            <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-600/30">
+            <button 
+              onClick={() => onAction('Provision Tenant')}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-600/30"
+            >
               <UserPlus className="w-3.5 h-3.5" /> Provision Tenant
             </button>
           </div>
           {TENANTS.map((t, i) => (
             <motion.div key={t.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.07 }}
-              className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:border-white/20 transition-all group cursor-pointer">
+              className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:border-white/20 transition-all group cursor-pointer"
+              onClick={() => onAction(`Detail Tenant: ${t.name}`)}
+            >
               <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0 text-xl">🏛</div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -111,7 +115,10 @@ export default function IdentityModule() {
                 <p className="text-2xl font-black text-white">{r.users}</p>
                 <p className="text-[10px] text-slate-500 uppercase tracking-widest">assigned</p>
               </div>
-              <button className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all shrink-0">
+              <button 
+                onClick={() => onAction(`Manajemen Peran ${r.name}`)}
+                className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all shrink-0"
+              >
                 <Key className="w-3.5 h-3.5" />
               </button>
             </motion.div>
@@ -129,10 +136,13 @@ export default function IdentityModule() {
                 <p className="text-sm font-black text-white">{p.name}</p>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{p.type}</p>
               </div>
-              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black border shrink-0 ${p.status === 'CONNECTED' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-slate-700/50 border-slate-600/30 text-slate-500'}`}>
+              <button 
+                onClick={() => onAction(`Konfigurasi SSO ${p.name}`)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black border shrink-0 ${p.status === 'CONNECTED' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-slate-700/50 border-slate-600/30 text-slate-500'}`}
+              >
                 {p.status === 'CONNECTED' ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
                 {p.status}
-              </div>
+              </button>
             </motion.div>
           ))}
         </div>

@@ -27,7 +27,7 @@ const SERVICES = [
   { name: 'Bull Queue Worker', port: null, status: 'RUNNING', uptime: '14d 6h 22m', latency: '—', icon: Wifi },
 ];
 
-export default function InfrastructureModule() {
+export default function InfrastructureModule({ onAction }: { onAction: (name: string) => void }) {
   const [series] = useState(() => METRICS.map(m => ({ key: m.key, data: genSeries(24, m.base, m.variance) })));
   const [live, setLive] = useState(() => METRICS.map(m => m.base));
 
@@ -48,7 +48,8 @@ export default function InfrastructureModule() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08 }}
-            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-white/20 transition-all"
+            onClick={() => onAction(`Detail ${m.label}`)}
+            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-white/20 transition-all cursor-pointer"
           >
             <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"
               style={{ boxShadow: `inset 0 0 40px ${m.color}15` }} />

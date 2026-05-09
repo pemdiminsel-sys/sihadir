@@ -31,7 +31,7 @@ const SEV_COLORS: Record<string, string> = {
   LOW: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
 };
 
-export default function SecurityModule() {
+export default function SecurityModule({ onAction }: { onAction: (name: string) => void }) {
   const [tab, setTab] = useState<'threats' | 'certs' | 'audit'>('threats');
 
   return (
@@ -39,13 +39,15 @@ export default function SecurityModule() {
       {/* KPI strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Threats Blocked', value: '1,247', icon: Ban, color: '#ef4444' },
-          { label: 'Active Sessions', value: '38', icon: Eye, color: '#3b82f6' },
-          { label: 'Auth Failures (24h)', value: '14', icon: Lock, color: '#f59e0b' },
-          { label: 'Security Score', value: '94/100', icon: ShieldCheck, color: '#10b981' },
+          { label: 'Threats Blocked', value: '0', icon: Ban, color: '#ef4444' },
+          { label: 'Active Sessions', value: '1', icon: Eye, color: '#3b82f6' },
+          { label: 'Auth Failures (24h)', value: '0', icon: Lock, color: '#f59e0b' },
+          { label: 'Security Score', value: '100/100', icon: ShieldCheck, color: '#10b981' },
         ].map((kpi, i) => (
           <motion.div key={kpi.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
-            className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:bg-white/[0.08] transition-all">
+            className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:bg-white/[0.08] transition-all cursor-pointer"
+            onClick={() => onAction(`Security KPI: ${kpi.label}`)}
+          >
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${kpi.color}20`, border: `1px solid ${kpi.color}40` }}>
               <kpi.icon className="w-5 h-5" style={{ color: kpi.color }} />
             </div>
@@ -69,13 +71,14 @@ export default function SecurityModule() {
 
       {tab === 'threats' && (
         <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-white/10">
+          <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
             <h3 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-red-400" /> Active Threat Intelligence Feed
+              <AlertTriangle className="w-4 h-4 text-emerald-400" /> Active Threat Intelligence Feed
             </h3>
+            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded">No Threats Detected</span>
           </div>
           <div className="divide-y divide-white/5">
-            {THREATS.map((t, i) => (
+            {[].map((t: any, i: number) => (
               <motion.div key={t.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.06 }}
                 className="px-6 py-4 flex items-center gap-4 hover:bg-white/5 transition-colors">
                 <span className="text-[10px] font-black text-slate-500 w-16 shrink-0">{t.id}</span>
@@ -90,6 +93,12 @@ export default function SecurityModule() {
                 </div>
               </motion.div>
             ))}
+            { [].length === 0 && (
+               <div className="px-6 py-12 text-center">
+                 <ShieldCheck className="w-8 h-8 text-emerald-500/30 mx-auto mb-2" />
+                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Platform secure. No malicious activity reported.</p>
+               </div>
+            )}
           </div>
         </div>
       )}
@@ -98,7 +107,9 @@ export default function SecurityModule() {
         <div className="space-y-3">
           {CERTS.map((c, i) => (
             <motion.div key={c.domain} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }}
-              className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:border-white/20 transition-all">
+              className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:border-white/20 transition-all cursor-pointer"
+              onClick={() => onAction(`Manajemen Sertifikat ${c.domain}`)}
+            >
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${c.daysLeft < 30 ? 'bg-amber-500/10 border border-amber-500/30' : 'bg-emerald-500/10 border border-emerald-500/30'}`}>
                 <Lock className={`w-5 h-5 ${c.daysLeft < 30 ? 'text-amber-400' : 'text-emerald-400'}`} />
               </div>
@@ -123,7 +134,9 @@ export default function SecurityModule() {
           <div className="divide-y divide-white/5">
             {AUDIT.map((a, i) => (
               <motion.div key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.06 }}
-                className="px-6 py-4 flex items-start gap-4 hover:bg-white/5 transition-colors">
+                className="px-6 py-4 flex items-start gap-4 hover:bg-white/5 transition-colors cursor-pointer"
+                onClick={() => onAction('Detail Audit Log')}
+              >
                 <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${a.severity === 'red' ? 'bg-red-400' : a.severity === 'amber' ? 'bg-amber-400' : a.severity === 'blue' ? 'bg-blue-400' : 'bg-emerald-400'}`} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">

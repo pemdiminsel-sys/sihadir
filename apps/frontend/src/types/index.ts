@@ -2,8 +2,15 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: string;
-  opd?: string;
+  role: {
+    id: string;
+    name: 'SUPER_ADMIN' | 'ADMIN_OPD' | 'PANITIA' | 'PESERTA';
+  };
+  opdId?: string;
+  opd?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface AuthResponse {

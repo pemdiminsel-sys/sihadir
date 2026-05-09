@@ -38,7 +38,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 const overallScore = SPBE_DOMAINS.reduce((s, d) => s + (d.score / d.max) * d.weight, 0) / SPBE_DOMAINS.reduce((s, d) => s + d.weight, 0) * 100;
 
-export default function ComplianceModule() {
+export default function ComplianceModule({ onAction }: { onAction: (name: string) => void }) {
   const [tab, setTab] = useState<'spbe' | 'regulations' | 'maintenance'>('spbe');
 
   return (
@@ -52,7 +52,9 @@ export default function ComplianceModule() {
           { label: 'Maintenance Pending', value: MAINTENANCE_SCHEDULE.filter(m=>m.status !== 'RECURRING').length, icon: Clock, color: '#3b82f6' },
         ].map((kpi, i) => (
           <motion.div key={kpi.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
-            className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:bg-white/[0.08] transition-all">
+            className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:bg-white/[0.08] transition-all cursor-pointer"
+            onClick={() => onAction(`Detail Compliance: ${kpi.label}`)}
+          >
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${kpi.color}20`, border: `1px solid ${kpi.color}40` }}>
               <kpi.icon className="w-5 h-5" style={{ color: kpi.color }} />
             </div>
@@ -98,7 +100,9 @@ export default function ComplianceModule() {
           {/* Domain breakdown */}
           {SPBE_DOMAINS.map((d, i) => (
             <motion.div key={d.domain} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.07 }}
-              className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-white/20 transition-all">
+              className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-white/20 transition-all cursor-pointer"
+              onClick={() => onAction(`Domain SPBE: ${d.domain}`)}
+            >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <BookOpen className="w-4 h-4 text-slate-400 shrink-0" />
@@ -124,7 +128,9 @@ export default function ComplianceModule() {
         <div className="space-y-3">
           {REGULATIONS.map((r, i) => (
             <motion.div key={r.ref} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.07 }}
-              className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:border-white/20 transition-all">
+              className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:border-white/20 transition-all cursor-pointer"
+              onClick={() => onAction(`Regulasi: ${r.title}`)}
+            >
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${STATUS_COLORS[r.status]}`}>
                 {r.status === 'COMPLIANT' ? <CheckCircle2 className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
               </div>
@@ -149,7 +155,9 @@ export default function ComplianceModule() {
           </div>
           {MAINTENANCE_SCHEDULE.map((m, i) => (
             <motion.div key={m.task} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.07 }}
-              className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-start gap-4 hover:border-white/20 transition-all">
+              className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-start gap-4 hover:border-white/20 transition-all cursor-pointer"
+              onClick={() => onAction(`Detail Maintenance ${m.task}`)}
+            >
               <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0 mt-0.5">
                 <Clock className="w-5 h-5 text-blue-400" />
               </div>
