@@ -23,6 +23,10 @@ model User {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   deletedAt     DateTime?
+  
+  // GovTech 2.0 MFA
+  mfaSecret     String?
+  mfaEnabled    Boolean        @default(false)
 
   @@map("users")
 }
@@ -67,6 +71,7 @@ model OPD {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   TenantConfig TenantConfig?
+  apiKeys      ApiKey[]
 
   @@map("opd")
 }
@@ -271,6 +276,10 @@ model AuditLog {
   details   Json?
   ipAddress String?
   createdAt DateTime @default(now())
+  
+  // GovTech 2.0 Blockchain Ledger
+  hash         String?
+  previousHash String?
 
   @@map("audit_logs")
 }
@@ -348,5 +357,19 @@ model NotificationQueue {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+
   @@map("notification_queue")
+}
+
+// GovTech 2.0 Open Government API
+model ApiKey {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  name      String
+  opdId     String?
+  opd       OPD?     @relation(fields: [opdId], references: [id])
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@map("api_keys")
 }

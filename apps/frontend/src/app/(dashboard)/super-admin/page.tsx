@@ -21,6 +21,7 @@ import OpdManagementModule from './modules/OpdManagementModule';
 import CommandCenterModule from './modules/CommandCenterModule';
 import ApprovalModule from './modules/ApprovalModule';
 import AnalyticsModule from './modules/AnalyticsModule';
+import GovTechSettingsModule from './modules/GovTechSettingsModule';
 import ComingSoonModal from '@/components/modals/ComingSoonModal';
 
 /* ─── Nav Modules ─── */
@@ -95,6 +96,12 @@ const MODULES = [
     id: 'analytics', label: 'Analitik SPBE', icon: Activity,
     badge: 'GOVTECH 2.0', badgeColor: 'violet',
     desc: 'Dashboard Skor & Kematangan SPBE',
+    group: 'GovTech 2.0',
+  },
+  {
+    id: 'govtech-settings', label: 'GovTech Core', icon: Brain,
+    badge: 'NEW', badgeColor: 'emerald',
+    desc: 'MFA, Blockchain Ledger, Open API',
     group: 'GovTech 2.0',
   },
 ];
@@ -346,6 +353,7 @@ export default function SuperAdminConsolePage() {
                   {active === 'command-center' && <CommandCenterModule onAction={handleAction} />}
                   {active === 'approval' && <ApprovalModule onAction={handleAction} />}
                   {active === 'analytics' && <AnalyticsModule onAction={handleAction} />}
+                  {active === 'govtech-settings' && <GovTechSettingsModule onAction={handleAction} />}
                 </motion.div>
               </AnimatePresence>
             </div>
