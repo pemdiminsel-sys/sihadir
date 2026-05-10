@@ -70,25 +70,27 @@ function QRLivePanel({ eventId, event }: { eventId: string; event: any }) {
       </div>
 
       {qr ? (
-        <div className="relative">
-          <div className="w-64 h-64 bg-white border-4 border-slate-900 rounded-[2.5rem] flex items-center justify-center shadow-2xl p-6">
-            <div className="bg-white p-2 rounded-2xl">
-              <QRCodeCanvas
-                value={`https://sihadir-minsel.vercel.app/attendance/${eventId}`}
-                size={200}
-                level="H"
-                includeMargin={false}
-                imageSettings={{
-                  src: "/logo-minsel.png",
-                  x: undefined,
-                  y: undefined,
-                  height: 45,
-                  width: 45,
-                  excavate: true,
-                }}
-              />
+        <div className="relative group cursor-pointer">
+          <a href={`https://sihadir-minsel.vercel.app/attendance/${eventId}`} target="_blank" rel="noopener noreferrer">
+            <div className="w-64 h-64 bg-white border-4 border-slate-900 rounded-[2.5rem] flex items-center justify-center shadow-2xl p-6 transition-transform hover:scale-105 active:scale-95">
+              <div className="bg-white p-2 rounded-2xl">
+                <QRCodeCanvas
+                  value={`https://sihadir-minsel.vercel.app/attendance/${eventId}`}
+                  size={200}
+                  level="H"
+                  includeMargin={false}
+                  imageSettings={{
+                    src: "/logo-minsel.png",
+                    x: undefined,
+                    y: undefined,
+                    height: 45,
+                    width: 45,
+                    excavate: true,
+                  }}
+                />
+              </div>
             </div>
-          </div>
+          </a>
           {event?.dynamicQr && (
             <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-black px-3 py-1 rounded-full flex items-center gap-1.5">
               <Clock className="w-3 h-3" /> {countdown}s
