@@ -6,7 +6,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, Clock, CheckCircle2, AlertCircle, 
-  ShieldCheck, Camera, User, ArrowRight, Loader2
+  Shield, Camera, User, ArrowRight, RefreshCw as Loader
 } from 'lucide-react';
 import api from '@/services/api';
 import { format } from 'date-fns';
@@ -50,7 +50,7 @@ export default function AttendancePage() {
 
   if (isLoading) return (
     <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6">
-      <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+      <Loader className="w-8 h-8 text-blue-500 animate-spin" />
     </div>
   );
 
@@ -78,7 +78,7 @@ export default function AttendancePage() {
             >
               <div className="text-center space-y-2">
                 <div className="w-16 h-16 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <ShieldCheck className="w-8 h-8 text-blue-500" />
+                  <Shield className="w-8 h-8 text-blue-500" />
                 </div>
                 <h1 className="text-2xl font-black text-white tracking-tight">Presensi Digital</h1>
                 <p className="text-slate-400 text-sm">{event.title}</p>
@@ -118,7 +118,7 @@ export default function AttendancePage() {
                 </div>
               ) : event.requireGps && !location ? (
                 <div className="text-center py-4">
-                  <Loader2 className="w-6 h-6 text-blue-500 animate-spin mx-auto mb-2" />
+                  <Loader className="w-6 h-6 text-blue-500 animate-spin mx-auto mb-2" />
                   <p className="text-xs text-slate-500">Memverifikasi lokasi GPS Anda...</p>
                 </div>
               ) : (
@@ -176,7 +176,7 @@ export default function AttendancePage() {
                 disabled={!form.participantId || submitMut.isPending}
                 className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-black rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-emerald-600/30 transition-all"
               >
-                {submitMut.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Kirim Kehadiran'}
+                {submitMut.isPending ? <Loader className="w-5 h-5 animate-spin" /> : 'Kirim Kehadiran'}
               </button>
             </motion.div>
           )}
