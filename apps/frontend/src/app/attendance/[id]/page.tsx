@@ -10,7 +10,8 @@ import {
 } from 'lucide-react';
 import api from '@/services/api';
 import { format } from 'date-fns';
-import { id as localeId } from 'date-fns/locale';
+import * as Locales from 'date-fns/locale';
+const localeId = Locales.id;
 
 export default function AttendancePage() {
   const { id } = useParams<{ id: string }>();
@@ -106,9 +107,15 @@ export default function AttendancePage() {
                   <div>
                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Waktu</p>
                     <p className="text-sm font-bold text-white">
-                      {event.startTime && event.endTime ? (
+                      {event?.startTime && event?.endTime ? (
                         <>
-                          {format(new Date(event.startTime), 'HH:mm', { locale: localeId })} – {format(new Date(event.endTime), 'HH:mm WITA', { locale: localeId })}
+                          {(() => {
+                            try {
+                              return `${format(new Date(event.startTime), 'HH:mm', { locale: localeId })} – ${format(new Date(event.endTime), 'HH:mm WITA', { locale: localeId })}`;
+                            } catch (e) {
+                              return 'Format waktu salah';
+                            }
+                          })()}
                         </>
                       ) : 'Waktu tidak tersedia'}
                     </p>
