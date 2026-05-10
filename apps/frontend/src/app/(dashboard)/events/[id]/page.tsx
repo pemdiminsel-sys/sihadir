@@ -74,7 +74,7 @@ function QRLivePanel({ eventId, event }: { eventId: string; event: any }) {
           <div className="w-64 h-64 bg-white border-4 border-slate-900 rounded-[2.5rem] flex items-center justify-center shadow-2xl p-6">
             <div className="bg-white p-2 rounded-2xl">
               <QRCodeCanvas
-                value={qr.token || 'https://sihadir.minsel.go.id'}
+                value="3ad7ea61-9b02-438e-a0ac-ab86c45e4d5a"
                 size={200}
                 level="H"
                 includeMargin={false}
