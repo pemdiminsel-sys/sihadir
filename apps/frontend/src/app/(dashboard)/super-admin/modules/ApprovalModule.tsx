@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Check, X, Shield, Search, Filter, UserCheck, AlertCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -15,16 +15,29 @@ const MOCK_REQUESTS = [
 
 export default function ApprovalModule({ onAction }: { onAction: (action: string) => void }) {
   const [requests, setRequests] = useState(MOCK_REQUESTS);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('sihadir_mock_approvals');
+    if (saved) {
+      setRequests(JSON.parse(saved));
+    }
+    setIsLoaded(true);
+  }, []);
 
   const handleApprove = (id: string) => {
-    setRequests(reqs => reqs.filter(r => r.id !== id));
-    // In real app, call API
+    const newReqs = requests.filter(r => r.id !== id);
+    setRequests(newReqs);
+    localStorage.setItem('sihadir_mock_approvals', JSON.stringify(newReqs));
   };
 
   const handleReject = (id: string) => {
-    setRequests(reqs => reqs.filter(r => r.id !== id));
-    // In real app, call API
+    const newReqs = requests.filter(r => r.id !== id);
+    setRequests(newReqs);
+    localStorage.setItem('sihadir_mock_approvals', JSON.stringify(newReqs));
   };
+
+  if (!isLoaded) return <div className="p-8 text-center text-slate-400">Memuat data...</div>;
 
   return (
     <div className="space-y-6">
