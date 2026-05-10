@@ -23,10 +23,11 @@ export default function AttendancePage() {
     selfieUrl: '',
   });
 
-  const { data: event, isLoading } = useQuery({
+  const { data: event, isLoading, isError } = useQuery({
     queryKey: ['event-public', id],
     queryFn: async () => (await api.get(`/events/${id}`)).data,
     enabled: !!id,
+    retry: 1,
   });
 
   const submitMut = useMutation({
@@ -53,12 +54,12 @@ export default function AttendancePage() {
     </div>
   );
 
-  if (!event) return (
+  if (isError || (!isLoading && !event)) return (
     <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-center">
       <div className="space-y-4">
         <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
         <h1 className="text-xl font-bold text-white">Kegiatan Tidak Ditemukan</h1>
-        <p className="text-slate-400">Pastikan link yang Anda gunakan benar.</p>
+        <p className="text-slate-400">Pastikan link yang Anda gunakan benar atau kegiatan telah aktif.</p>
       </div>
     </div>
   );
@@ -100,7 +101,11 @@ export default function AttendancePage() {
                   <div>
                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Waktu</p>
                     <p className="text-sm font-bold text-white">
-                      {format(new Date(event.startTime), 'HH:mm', { locale: localeId })} – {format(new Date(event.endTime), 'HH:mm WITA', { locale: localeId })}
+                      {event.startTime && event.endTime ? (
+                        <>
+                          {format(new Date(event.startTime), 'HH:mm', { locale: localeId })} – {format(new Date(event.endTime), 'HH:mm WITA', { locale: localeId })}
+                        </>
+                      ) : 'Waktu tidak tersedia'}
                     </p>
                   </div>
                 </div>
