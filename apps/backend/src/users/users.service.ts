@@ -73,6 +73,21 @@ export class UsersService {
     return this.prisma.user.delete({ where: { id } });
   }
 
+  async changePassword(userId: string, current: string, newPass: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User tidak ditemukan');
+    
+    const isValid = await bcrypt.compare(current, user.password);
+    if (!isValid) throw new ConflictException('Password saat ini salah');
+
+    const hashedPassword = await bcrypt.hash(newPass, 10);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+    return { success: true, message: 'Password berhasil diperbarui' };
+  }
+
   async getRoles() {
     return this.prisma.role.findMany({
       orderBy: { name: 'asc' },

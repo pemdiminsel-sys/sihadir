@@ -7,9 +7,46 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Shield, User, Bell } from 'lucide-react';
+import { useState } from 'react';
+import api from '@/services/api';
 
 export default function SettingsPage() {
   const { user } = useAuthStore();
+  
+  const [passwords, setPasswords] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+
+  const handleUpdatePassword = async () => {
+    if (passwords.newPassword !== passwords.confirmPassword) {
+      setPasswordError('Konfirmasi password tidak cocok.');
+      return;
+    }
+    if (passwords.newPassword.length < 6) {
+      setPasswordError('Password baru minimal 6 karakter.');
+      return;
+    }
+    try {
+      setPasswordLoading(true);
+      setPasswordError('');
+      setPasswordSuccess('');
+      await api.post('/users/me/password', {
+        currentPassword: passwords.currentPassword,
+        newPassword: passwords.newPassword
+      });
+      setPasswordSuccess('Password berhasil diperbarui.');
+      setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (error: any) {
+      setPasswordError(error.response?.data?.message || 'Gagal memperbarui password');
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-8 pb-12 max-w-4xl">
@@ -77,22 +114,56 @@ export default function SettingsPage() {
               <CardDescription>Pastikan akun Anda menggunakan password yang kuat.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {passwordError && (
+                <div className="p-3 rounded-xl bg-red-50 text-red-500 text-sm border border-red-100">
+                  {passwordError}
+                </div>
+              )}
+              {passwordSuccess && (
+                <div className="p-3 rounded-xl bg-green-50 text-green-600 text-sm border border-green-100">
+                  {passwordSuccess}
+                </div>
+              )}
               <div className="space-y-4 max-w-md">
                 <div className="space-y-2">
                   <Label htmlFor="current">Password Saat Ini</Label>
-                  <Input id="current" type="password" className="rounded-xl" />
+                  <Input 
+                    id="current" 
+                    type="password" 
+                    className="rounded-xl" 
+                    value={passwords.currentPassword}
+                    onChange={(e) => setPasswords({...passwords, currentPassword: e.target.value})}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="new">Password Baru</Label>
-                  <Input id="new" type="password" className="rounded-xl" />
+                  <Input 
+                    id="new" 
+                    type="password" 
+                    className="rounded-xl" 
+                    value={passwords.newPassword}
+                    onChange={(e) => setPasswords({...passwords, newPassword: e.target.value})}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirm">Konfirmasi Password Baru</Label>
-                  <Input id="confirm" type="password" className="rounded-xl" />
+                  <Input 
+                    id="confirm" 
+                    type="password" 
+                    className="rounded-xl" 
+                    value={passwords.confirmPassword}
+                    onChange={(e) => setPasswords({...passwords, confirmPassword: e.target.value})}
+                  />
                 </div>
               </div>
               <div className="flex justify-start pt-4">
-                <Button className="bg-slate-900 rounded-xl px-8">Perbarui Password</Button>
+                <Button 
+                  className="bg-slate-900 rounded-xl px-8" 
+                  onClick={handleUpdatePassword}
+                  disabled={passwordLoading || !passwords.currentPassword || !passwords.newPassword || !passwords.confirmPassword}
+                >
+                  {passwordLoading ? 'Menyimpan...' : 'Perbarui Password'}
+                </Button>
               </div>
             </CardContent>
           </Card>

@@ -22,7 +22,7 @@ import CommandCenterModule from './modules/CommandCenterModule';
 import ApprovalModule from './modules/ApprovalModule';
 import AnalyticsModule from './modules/AnalyticsModule';
 import GovTechSettingsModule from './modules/GovTechSettingsModule';
-import ComingSoonModal from '@/components/modals/ComingSoonModal';
+import GenericConfigModal from '@/components/modals/GenericConfigModal';
 
 /* ─── Nav Modules ─── */
 const MODULES = [
@@ -169,7 +169,7 @@ export default function SuperAdminConsolePage() {
       </div>
 
       <div className="relative z-10 flex flex-col h-screen">
-        <ComingSoonModal 
+        <GenericConfigModal 
           isOpen={comingSoon.isOpen} 
           onClose={() => setComingSoon({ ...comingSoon, isOpen: false })} 
           featureName={comingSoon.name} 

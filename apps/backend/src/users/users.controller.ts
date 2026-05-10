@@ -6,7 +6,8 @@ import {
   Delete,
   Body, 
   Param,
-  UseGuards 
+  UseGuards,
+  Request
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -54,5 +55,10 @@ export class UsersController {
   @Roles(Role.SUPER_ADMIN)
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
+  }
+
+  @Post('me/password')
+  changePassword(@Request() req, @Body() data: any) {
+    return this.usersService.changePassword(req.user.id, data.currentPassword, data.newPassword);
   }
 }

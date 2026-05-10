@@ -42,14 +42,14 @@ const menuGroups: { group: string; items: MenuItem[] }[] = [
     group: 'Operasional',
     items: [
       { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-      { icon: Globe, label: 'Command Center', href: '#', premium: true, isGlowing: true, comingSoon: true },
+      { icon: Globe, label: 'Command Center', href: '/command-center', premium: true, isGlowing: true },
     ]
   },
   {
     group: 'Manajemen Kegiatan',
     items: [
       { icon: Calendar, label: 'Daftar Kegiatan', href: '/events' },
-      { icon: ClipboardList, label: 'Persetujuan Peserta', href: '#', badge: '●', comingSoon: true },
+      { icon: ClipboardList, label: 'Persetujuan Peserta', href: '/approvals', badge: '●' },
       { icon: Users, label: 'Direktori Peserta', href: '/participants' },
       { icon: Award, label: 'Sertifikat Digital', href: '/certificates' },
     ]
@@ -57,7 +57,7 @@ const menuGroups: { group: string; items: MenuItem[] }[] = [
   {
     group: 'Analitik & Laporan',
     items: [
-      { icon: Zap, label: 'Analitik SPBE', href: '#', comingSoon: true },
+      { icon: Zap, label: 'Analitik SPBE', href: '/spbe-analytics' },
       { icon: BarChart3, label: 'Laporan Komprehensif', href: '/reports' },
       { icon: ShieldCheck, label: 'Audit Trail', href: '/audit-logs' },
     ]

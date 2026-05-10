@@ -6,7 +6,8 @@ export class OpdService {
   constructor(private prisma: PrismaService) {}
 
   async create(data: any) {
-    return this.prisma.oPD.create({ data });
+    const { name, code } = data;
+    return this.prisma.oPD.create({ data: { name, code } });
   }
 
   async findAll() {
@@ -20,7 +21,8 @@ export class OpdService {
   }
 
   async update(id: string, data: any) {
-    return this.prisma.oPD.update({ where: { id }, data });
+    const { name, code } = data;
+    return this.prisma.oPD.update({ where: { id }, data: { name, code } });
   }
 
   async remove(id: string) {
