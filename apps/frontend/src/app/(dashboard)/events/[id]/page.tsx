@@ -13,6 +13,7 @@ import {
   Download, AlertTriangle, CheckCircle2, Hourglass, List, LayoutGrid, Send,
   Pencil, Trash2, X, Info, Settings2, QrCode as QrIcon, Bell, MapPin as PinIcon
 } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 
 const TABS = [
   { id: 'ringkasan', label: 'Ringkasan', icon: Activity },
@@ -70,9 +71,22 @@ function QRLivePanel({ eventId, event }: { eventId: string; event: any }) {
 
       {qr ? (
         <div className="relative">
-          <div className="w-56 h-56 bg-white border-4 border-slate-900 rounded-2xl flex items-center justify-center shadow-2xl p-4">
-            <div className="w-full h-full bg-slate-900 rounded-lg flex items-center justify-center">
-              <QrCode className="w-24 h-24 text-white" />
+          <div className="w-64 h-64 bg-white border-4 border-slate-900 rounded-[2.5rem] flex items-center justify-center shadow-2xl p-6">
+            <div className="bg-white p-2 rounded-2xl">
+              <QRCodeCanvas
+                value={qr.token || 'https://sihadir.minsel.go.id'}
+                size={200}
+                level="H"
+                includeMargin={false}
+                imageSettings={{
+                  src: "/logo-minsel.png",
+                  x: undefined,
+                  y: undefined,
+                  height: 45,
+                  width: 45,
+                  excavate: true,
+                }}
+              />
             </div>
           </div>
           {event?.dynamicQr && (
