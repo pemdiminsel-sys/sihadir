@@ -200,6 +200,7 @@ model Attendance {
   latitude      Float?
   longitude     Float?
   selfieUrl     String?
+  signatureUrl  String?
   status        String      @default("HADIR")
   deviceInfo    String?
   isLate        Boolean     @default(false)

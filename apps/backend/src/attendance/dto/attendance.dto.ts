@@ -5,13 +5,28 @@ export class SubmitAttendanceDto {
   eventId: string;
 
   @IsUUID()
-  participantId: string;
+  @IsOptional()
+  participantId?: string;
+
+  @IsString()
+  @IsOptional()
+  name?: string;
+
+  @IsString()
+  @IsOptional()
+  position?: string;
+
+  @IsString()
+  @IsOptional()
+  institution?: string;
 
   @IsNumber()
-  latitude: number;
+  @IsOptional()
+  latitude?: number;
 
   @IsNumber()
-  longitude: number;
+  @IsOptional()
+  longitude?: number;
 
   @IsString()
   @IsOptional()
@@ -19,8 +34,13 @@ export class SubmitAttendanceDto {
 
   @IsString()
   @IsOptional()
+  signatureUrl?: string;
+
+  @IsString()
+  @IsOptional()
   deviceInfo?: string;
 
   @IsString()
-  qrToken: string;
+  @IsOptional()
+  qrToken?: string;
 }

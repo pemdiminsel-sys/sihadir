@@ -64,14 +64,32 @@ export class AttendanceService {
       }
     }
 
-    // 3. Save Attendance
+    // 3. Participant Identification (Create if not exists)
+    let participantId = dto.participantId;
+    if (!participantId && dto.name) {
+      const participant = await this.prisma.participant.create({
+        data: {
+          name: dto.name,
+          position: dto.position,
+          institution: dto.institution,
+        },
+      });
+      participantId = participant.id;
+    }
+
+    if (!participantId) {
+      throw new BadRequestException('ID Peserta atau Nama wajib diisi');
+    }
+
+    // 4. Save Attendance
     const attendance = await this.prisma.attendance.create({
       data: {
         eventId: dto.eventId,
-        participantId: dto.participantId,
+        participantId: participantId,
         latitude: dto.latitude,
         longitude: dto.longitude,
         selfieUrl: dto.selfieUrl,
+        signatureUrl: dto.signatureUrl,
         deviceInfo: dto.deviceInfo,
       },
       include: {
@@ -80,7 +98,7 @@ export class AttendanceService {
       },
     });
 
-    // 4. Realtime Broadcast (skip on serverless/Vercel where WebSocket is unavailable)
+    // 5. Realtime Broadcast (skip on serverless/Vercel where WebSocket is unavailable)
     if (this.gateway) {
       this.gateway.broadcastAttendance(attendance);
     }
