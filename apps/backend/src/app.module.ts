@@ -10,14 +10,16 @@ import { EventsModule } from './events/events.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { ReportsModule } from './reports/reports.module';
 import { FilesModule } from './files/files.module';
-import { SocketModule } from './socket/socket.module';
 import { ParticipantsModule } from './participants/participants.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { RegistrationsModule } from './registrations/registrations.module';
 import { SmtpModule } from './smtp/smtp.module';
 import { GovTechModule } from './govtech/govtech.module';
 
-// Conditionally import BullModule only when Redis is available (not on Vercel serverless)
+// SocketModule (WebSocket) dinonaktifkan di Vercel — tidak kompatibel dengan Serverless Functions
+// Aktifkan kembali hanya saat self-hosted: import { SocketModule } from './socket/socket.module';
+
+// BullModule (Redis queue) hanya aktif jika REDIS_HOST tersedia
 const bullModules = process.env.REDIS_HOST
   ? [
       require('@nestjs/bull').BullModule.forRoot({
@@ -40,7 +42,6 @@ const bullModules = process.env.REDIS_HOST
     AttendanceModule,
     ReportsModule,
     FilesModule,
-    SocketModule,
     ParticipantsModule,
     NotificationsModule,
     RegistrationsModule,

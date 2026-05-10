@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Optional } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SubmitAttendanceDto } from './dto/attendance.dto';
 import { AppGateway } from '../socket/socket.gateway';
@@ -7,7 +7,7 @@ import { AppGateway } from '../socket/socket.gateway';
 export class AttendanceService {
   constructor(
     private prisma: PrismaService,
-    private gateway: AppGateway,
+    @Optional() private gateway: AppGateway,
   ) {}
 
   private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -80,8 +80,10 @@ export class AttendanceService {
       },
     });
 
-    // 4. Realtime Broadcast
-    this.gateway.broadcastAttendance(attendance);
+    // 4. Realtime Broadcast (skip on serverless/Vercel where WebSocket is unavailable)
+    if (this.gateway) {
+      this.gateway.broadcastAttendance(attendance);
+    }
 
     return attendance;
   }
