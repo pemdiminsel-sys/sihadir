@@ -15,6 +15,7 @@ import { id as localeId } from 'date-fns/locale';
 export default function AttendancePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState<'verify' | 'form' | 'success'>('verify');
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locError, setLocError] = useState<string | null>(null);
@@ -22,6 +23,10 @@ export default function AttendancePage() {
     participantId: '',
     selfieUrl: '',
   });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const { data: event, isLoading, isError } = useQuery({
     queryKey: ['event-public', id],
@@ -48,7 +53,7 @@ export default function AttendancePage() {
     }
   }, [event]);
 
-  if (isLoading) return (
+  if (!mounted || isLoading) return (
     <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6">
       <Loader className="w-8 h-8 text-blue-500 animate-spin" />
     </div>
