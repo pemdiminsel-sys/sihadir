@@ -32,8 +32,8 @@ export class AttendanceService {
 
     if (!event) throw new BadRequestException('Kegiatan tidak ditemukan');
 
-    // 1. QR Validation
-    if (event.qrType === 'DYNAMIC') {
+    // 1. QR Validation (Only if token is provided or event is dynamic and token is available)
+    if (event.qrType === 'DYNAMIC' && dto.qrToken) {
       const qrCode = await this.prisma.qRCode.findFirst({
         where: {
           eventId: dto.eventId,

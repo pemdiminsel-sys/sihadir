@@ -77,6 +77,7 @@ export default function AttendancePage() {
     ctx.beginPath();
     ctx.moveTo(x, y);
     setIsDrawing(true);
+    if (e.touches) e.preventDefault();
   };
 
   const draw = (e: any) => {
@@ -87,12 +88,12 @@ export default function AttendancePage() {
     if (!ctx) return;
     
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX || e.touches[0].clientX) - rect.left;
-    const y = (e.clientY || e.touches[0].clientY) - rect.top;
+    const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+    const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
     
     ctx.lineTo(x, y);
     ctx.stroke();
-    e.preventDefault();
+    if (e.touches) e.preventDefault();
   };
 
   const stopDrawing = () => {
@@ -307,19 +308,19 @@ export default function AttendancePage() {
                       <Trash2 className="w-3 h-3" /> Bersihkan
                     </button>
                   </div>
-                  <div className="bg-white rounded-2xl overflow-hidden border-2 border-white/5">
+                  <div className="bg-white rounded-2xl overflow-hidden border-2 border-white/5 shadow-inner">
                     <canvas 
                       ref={canvasRef}
                       width={400}
                       height={180}
-                      className="w-full bg-white cursor-crosshair"
+                      className="w-full bg-white cursor-crosshair touch-none"
                       onMouseDown={startDrawing}
                       onMouseMove={draw}
                       onMouseUp={stopDrawing}
                       onMouseOut={stopDrawing}
-                      onTouchStart={startDrawing}
-                      onTouchMove={draw}
-                      onTouchEnd={stopDrawing}
+                      onTouchStart={(e) => { e.preventDefault(); startDrawing(e); }}
+                      onTouchMove={(e) => { e.preventDefault(); draw(e); }}
+                      onTouchEnd={(e) => { e.preventDefault(); stopDrawing(); }}
                     />
                   </div>
                   <p className="text-[9px] text-slate-500 italic text-center">Silakan bubuhkan tanda tangan Anda pada area putih di atas.</p>
