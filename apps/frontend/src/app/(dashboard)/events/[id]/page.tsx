@@ -480,7 +480,15 @@ function EditEventModal({ event, onClose, onSave, isSaving }: any) {
           </button>
         </div>
 
-        <form onSubmit={(e) => { e.preventDefault(); onSave(form); }} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+        <form onSubmit={(e) => { 
+          e.preventDefault(); 
+          const payload = {
+            ...form,
+            startTime: new Date(form.startTime).toISOString(),
+            endTime: new Date(form.endTime).toISOString(),
+          };
+          onSave(payload); 
+        }} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
           <div className="space-y-4">
             <div>
               <label className={labelCls}>Judul Kegiatan</label>

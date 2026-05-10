@@ -57,9 +57,20 @@ export class EventsService {
   }
 
   async update(id: string, data: any) {
+    const { 
+      opd, _count, sessions, attendances, qrCodes, certificates, registrations, AnomalyLog,
+      startTime, endTime,
+      ...cleanData 
+    } = data;
+
+    const updateData: any = { ...cleanData };
+
+    if (startTime) updateData.startTime = new Date(startTime);
+    if (endTime) updateData.endTime = new Date(endTime);
+
     return this.prisma.event.update({
       where: { id },
-      data,
+      data: updateData,
     });
   }
 
