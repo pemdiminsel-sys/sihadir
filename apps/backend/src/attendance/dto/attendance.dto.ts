@@ -14,6 +14,14 @@ export class SubmitAttendanceDto {
 
   @IsString()
   @IsOptional()
+  participantType?: string;
+
+  @IsString()
+  @IsOptional()
+  identityNumber?: string;
+
+  @IsString()
+  @IsOptional()
   position?: string;
 
   @IsString()

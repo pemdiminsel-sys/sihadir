@@ -70,6 +70,8 @@ export class AttendanceService {
       const participant = await this.prisma.participant.create({
         data: {
           name: dto.name,
+          participantType: dto.participantType || 'ASN',
+          identityNumber: dto.identityNumber,
           position: dto.position,
           institution: dto.institution,
         },

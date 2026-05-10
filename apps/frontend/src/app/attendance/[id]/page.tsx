@@ -25,6 +25,8 @@ export default function AttendancePage() {
 
   const [form, setForm] = useState({
     name: '',
+    participantType: 'ASN',
+    identityNumber: '',
     position: '',
     institution: '',
     participantId: '',
@@ -214,16 +216,57 @@ export default function AttendancePage() {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nama Lengkap</label>
-                    <div className="relative">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                      <input 
-                        type="text"
-                        placeholder="Nama Lengkap & Gelar"
-                        className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
-                        value={form.name}
-                        onChange={e => setForm({...form, name: e.target.value})}
-                      />
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Kategori Peserta</label>
+                    <div className="flex p-1 bg-white/5 rounded-2xl border border-white/10">
+                      {[
+                        { id: 'ASN', label: 'ASN' },
+                        { id: 'LAIN', label: 'Instansi Lain' },
+                        { id: 'MASYARAKAT', label: 'Masyarakat' }
+                      ].map((cat) => (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => setForm({ ...form, participantType: cat.id, identityNumber: '' })}
+                          className={`flex-1 h-10 rounded-xl text-[10px] font-black transition-all ${
+                            form.participantType === cat.id 
+                              ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' 
+                              : 'text-slate-500 hover:text-slate-300'
+                          }`}
+                        >
+                          {cat.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nama Lengkap</label>
+                      <div className="relative">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                        <input 
+                          type="text"
+                          placeholder="Nama Lengkap & Gelar"
+                          className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
+                          value={form.name}
+                          onChange={e => setForm({...form, name: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                        {form.participantType === 'ASN' ? 'NIP' : form.participantType === 'LAIN' ? 'Nomor Pegawai' : 'No KTP (NIK)'}
+                      </label>
+                      <div className="relative">
+                        <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                        <input 
+                          type="text"
+                          placeholder={`Masukkan ${form.participantType === 'ASN' ? 'NIP' : form.participantType === 'LAIN' ? 'Nomor Pegawai' : 'NIK'}`}
+                          className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
+                          value={form.identityNumber}
+                          onChange={e => setForm({...form, identityNumber: e.target.value})}
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -296,6 +339,8 @@ export default function AttendancePage() {
                     submitMut.mutate({
                       eventId: id,
                       name: form.name,
+                      participantType: form.participantType,
+                      identityNumber: form.identityNumber,
                       position: form.position,
                       institution: form.institution,
                       signatureUrl: signature,
