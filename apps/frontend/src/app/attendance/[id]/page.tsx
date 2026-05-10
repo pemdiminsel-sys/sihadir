@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import api from '@/services/api';
 import { format } from 'date-fns';
-import { id as localeId } from 'date-fns/locale';
+import { id } from 'date-fns/locale';
 
 export default function AttendancePage() {
   const { id } = useParams<{ id: string }>();
@@ -100,7 +100,7 @@ export default function AttendancePage() {
                   <div>
                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Waktu</p>
                     <p className="text-sm font-bold text-white">
-                      {format(new Date(event.startTime), 'HH:mm', { locale: localeId })} – {format(new Date(event.endTime), 'HH:mm WITA', { locale: localeId })}
+                      {format(new Date(event.startTime), 'HH:mm', { locale: id })} – {format(new Date(event.endTime), 'HH:mm WITA', { locale: id })}
                     </p>
                   </div>
                 </div>
